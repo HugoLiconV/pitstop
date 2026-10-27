@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { serviceSchema } from "./service";
+import { checkServiceDate, serviceSchema } from "./service";
 
 const valid = {
   date: "2026-10-26",
@@ -19,5 +19,15 @@ describe("serviceSchema", () => {
     const r = serviceSchema.safeParse({ ...valid, items: [] });
     expect(r.success).toBe(false);
     expect(r.error?.issues[0].message).toBe("Selecciona al menos un mantenimiento.");
+  });
+});
+
+describe("checkServiceDate", () => {
+  it("rejects a date after today in Mexico", () => {
+    expect(checkServiceDate("2026-10-27", "2026-10-26")).toBe("La fecha no puede ser futura.");
+  });
+  it("accepts today and past dates", () => {
+    expect(checkServiceDate("2026-10-26", "2026-10-26")).toBeNull();
+    expect(checkServiceDate("2024-08-10", "2026-10-26")).toBeNull();
   });
 });

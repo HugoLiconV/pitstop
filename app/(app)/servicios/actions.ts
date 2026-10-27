@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { getOdometerNeighbors, getVehicle } from "@/lib/data/vehicle";
 import { createClient } from "@/lib/supabase/server";
 import { checkOdometer } from "@/lib/validation/odometer";
-import { serviceSchema } from "@/lib/validation/service";
+import { checkServiceDate, serviceSchema } from "@/lib/validation/service";
+import { todayInMexico } from "@/lib/due";
 import type { UploadedFile } from "@/lib/data/attachments";
 
 export type CreateServiceState = {
@@ -32,6 +33,10 @@ export async function createService(_prev: CreateServiceState, formData: FormDat
     return { errors };
   }
   const input = parsed.data;
+  const dateError = checkServiceDate(input.date, todayInMexico());
+  if (dateError) return { errors: { date: dateError } };
+  const clientToken = String(formData.get("clientToken") ?? "");
+  if (!clientToken) return { errors: { form: "Recarga la página e intenta de nuevo." } };
 
   const vehicle = await getVehicle();
   const check = checkOdometer(input, await getOdometerNeighbors(vehicle.id, input.date));
@@ -46,6 +51,7 @@ export async function createService(_prev: CreateServiceState, formData: FormDat
     p_total_cost: input.totalCostMxn ?? null,
     p_notes: input.notes ?? null,
     p_items: input.items.map((i) => ({ maintenance_item_id: i.maintenanceItemId, cost_mxn: i.costMxn ?? null })),
+    p_client_token: clientToken,
   } as never);
   if (error || !serviceId) return { errors: { form: "No se pudo guardar el servicio. Intenta de nuevo." } };
 

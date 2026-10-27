@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { startTransition, useActionState, useEffect, useState, type FormEvent } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import type { DueStatus } from "@/lib/due";
 import { uploadAttachments } from "@/lib/data/attachments";
 import { addAttachments, createService } from "../actions";
@@ -17,6 +17,9 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
   const [files, setFiles] = useState<File[]>([]);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [uploading, setUploading] = useState(false);
+  // One token per form: retries and double taps resolve to the same service on the server.
+  const [clientToken] = useState(() => crypto.randomUUID());
+  const submitting = useRef(false);
 
   // Once the service is saved, upload receipts, then go to its detail page.
   useEffect(() => {
@@ -44,9 +47,14 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
   // Submitting manually avoids React's automatic form reset, so an error keeps what was typed.
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
     const submitter = (e.nativeEvent as SubmitEvent).submitter;
     const data = new FormData(e.currentTarget, submitter);
-    startTransition(() => action(data));
+    startTransition(async () => {
+      await action(data);
+      submitting.current = false;
+    });
   };
 
   const toggle = (id: string) =>
@@ -59,6 +67,7 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
+      <input type="hidden" name="clientToken" value={clientToken} />
       <div className="grid grid-cols-2 gap-3">
         <label className="flex flex-col gap-1 text-sm text-muted">
           Fecha

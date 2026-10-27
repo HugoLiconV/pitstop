@@ -15,3 +15,7 @@ export const serviceSchema = z.object({
 });
 
 export type ServiceInput = z.infer<typeof serviceSchema>;
+
+export function checkServiceDate(date: string, today: string): string | null {
+  return date > today ? "La fecha no puede ser futura." : null;
+}

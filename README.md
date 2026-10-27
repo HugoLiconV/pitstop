@@ -32,9 +32,9 @@ Tests: `pnpm test` (Vitest) and `pnpm supabase test db` (RLS, pgTAP).
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `CRON_SECRET` (any long random string)
 
-   Then deploy. `vercel.json` schedules a weekly keep-alive to `/api/cron/keepalive`, so the free database doesn't pause.
+   Then deploy. `vercel.json` schedules a twice-weekly keep-alive to `/api/cron/keepalive`, so the free database doesn't pause.
 
 ## Free-tier limits worth knowing
 
 - Supabase Storage: 1 GB in total for receipts. Each file is limited to 10 MB.
-- Supabase pauses a free project after 7 idle days. The weekly cron prevents this.
+- Supabase pauses a free project after 7 idle days. The twice-weekly cron prevents this.

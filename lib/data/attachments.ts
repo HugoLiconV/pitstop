@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/browser";
-import { checkAttachment } from "@/lib/validation/attachment";
+import { checkAttachment, mimeFor } from "@/lib/validation/attachment";
 
 export type UploadedFile = { storagePath: string; fileName: string; mimeType: string; sizeBytes: number };
 
@@ -23,11 +23,10 @@ export async function uploadAttachments(
     }
     const safeName = file.name.replace(/[^\w.\-]+/g, "_");
     const storagePath = `${userId}/${serviceId}/${crypto.randomUUID()}-${safeName}`;
-    const { error } = await supabase.storage
-      .from("attachments")
-      .upload(storagePath, file, { contentType: file.type || undefined });
+    const mimeType = mimeFor(file);
+    const { error } = await supabase.storage.from("attachments").upload(storagePath, file, { contentType: mimeType });
     if (error) failed.push(file.name);
-    else uploaded.push({ storagePath, fileName: file.name, mimeType: file.type, sizeBytes: file.size });
+    else uploaded.push({ storagePath, fileName: file.name, mimeType, sizeBytes: file.size });
   }
   return { uploaded, failed };
 }

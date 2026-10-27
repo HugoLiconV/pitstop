@@ -14,3 +14,19 @@ export function checkAttachment(file: { name: string; type: string; size: number
   }
   return { ok: true };
 }
+
+const MIME_BY_EXT: Record<string, string> = {
+  pdf: "application/pdf",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  heic: "image/heic",
+  heif: "image/heif",
+};
+
+// Browsers often report "" or a generic type for HEIC/PDF; fall back to the extension.
+export function mimeFor(file: { name: string; type: string }): string {
+  if (file.type && file.type !== "application/octet-stream") return file.type;
+  const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
+  return MIME_BY_EXT[ext] ?? "application/octet-stream";
+}

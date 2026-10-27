@@ -111,14 +111,14 @@ isOneToOne: false
                   ]
                 },"services": {
                   Row: {
-                    "created_at": string,"date": string,"id": string,"km": number,"notes": string | null,"total_cost_mxn": number | null,"user_id": string,"vehicle_id": string,"workshop": string | null
+                    "client_token": string | null,"created_at": string,"date": string,"id": string,"km": number,"notes": string | null,"total_cost_mxn": number | null,"user_id": string,"vehicle_id": string,"workshop": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"date": string,"id"?: string,"km": number,"notes"?: string | null,"total_cost_mxn"?: number | null,"user_id"?: string,"vehicle_id": string,"workshop"?: string | null
+                    "client_token"?: string | null,"created_at"?: string,"date": string,"id"?: string,"km": number,"notes"?: string | null,"total_cost_mxn"?: number | null,"user_id"?: string,"vehicle_id": string,"workshop"?: string | null
                   }
                   Update: {
-                    "created_at"?: string,"date"?: string,"id"?: string,"km"?: number,"notes"?: string | null,"total_cost_mxn"?: number | null,"user_id"?: string,"vehicle_id"?: string,"workshop"?: string | null
+                    "client_token"?: string | null,"created_at"?: string,"date"?: string,"id"?: string,"km"?: number,"notes"?: string | null,"total_cost_mxn"?: number | null,"user_id"?: string,"vehicle_id"?: string,"workshop"?: string | null
                   }
                   Relationships: [
                     {
@@ -150,7 +150,7 @@ isOneToOne: false
           }
           Functions: {
             "record_service":
-{ Args: { "p_date": string,"p_items": Json,"p_km": number,"p_notes": string,"p_total_cost": number,"p_vehicle_id": string,"p_workshop": string }; Returns: string
+{ Args: { "p_client_token": string,"p_date": string,"p_items": Json,"p_km": number,"p_notes": string,"p_total_cost": number,"p_vehicle_id": string,"p_workshop": string }; Returns: string
                            },
 "seed_pitstop":
 { Args: { "p_initial_km": number,"p_purchase_date": string,"p_user": string }; Returns: string
