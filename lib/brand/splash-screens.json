@@ -1,0 +1,13 @@
+[
+  { "width": 1320, "height": 2868, "deviceWidth": 440, "deviceHeight": 956, "ratio": 3 },
+  { "width": 1206, "height": 2622, "deviceWidth": 402, "deviceHeight": 874, "ratio": 3 },
+  { "width": 1290, "height": 2796, "deviceWidth": 430, "deviceHeight": 932, "ratio": 3 },
+  { "width": 1179, "height": 2556, "deviceWidth": 393, "deviceHeight": 852, "ratio": 3 },
+  { "width": 1284, "height": 2778, "deviceWidth": 428, "deviceHeight": 926, "ratio": 3 },
+  { "width": 1170, "height": 2532, "deviceWidth": 390, "deviceHeight": 844, "ratio": 3 },
+  { "width": 1080, "height": 2340, "deviceWidth": 360, "deviceHeight": 780, "ratio": 3 },
+  { "width": 1125, "height": 2436, "deviceWidth": 375, "deviceHeight": 812, "ratio": 3 },
+  { "width": 1242, "height": 2688, "deviceWidth": 414, "deviceHeight": 896, "ratio": 3 },
+  { "width": 828, "height": 1792, "deviceWidth": 414, "deviceHeight": 896, "ratio": 2 },
+  { "width": 750, "height": 1334, "deviceWidth": 375, "deviceHeight": 667, "ratio": 2 }
+]

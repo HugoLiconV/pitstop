@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import Loading from "./loading";
 import { CarIndex } from "@/components/car-index";
 import { Odometer } from "@/components/odometer";
-import { Chip, Label, Panel, PillAction } from "@/components/ui";
+import { Chip, Label, Panel, PillAction, Wordmark } from "@/components/ui";
 import { UpdateKmSheet } from "@/components/update-km-sheet";
 import { getDueSummary } from "@/lib/data/due";
 
@@ -13,7 +13,7 @@ async function InicioContent() {
 
   const summary = <>
     <header className="flex items-center justify-between gap-4">
-      <span className="text-[22px] font-semibold tracking-[-0.06em]">pitstop<span className="text-accent">/</span></span>
+      <Wordmark />
       <Label as="span">Bitácora personal</Label>
     </header>
     <Panel as="section" className="relative mt-5 overflow-hidden !pt-6">

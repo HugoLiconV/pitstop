@@ -10,3 +10,4 @@ export { PanelHeader } from "./panel-header";
 export { Stat } from "./stat";
 export { Field } from "./field";
 export { Alert } from "./alert";
+export { Wordmark } from "./wordmark";

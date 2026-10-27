@@ -33,5 +33,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api/cron|_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|webp)$).*)"],
+  // Icons, splash screens and the manifest must load signed out: browsers fetch the manifest without cookies.
+  matcher: ["/((?!api/cron|_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:png|jpg|svg|ico|webp)$).*)"],
 };
