@@ -2,34 +2,36 @@
 
 import { formatKm } from "@/lib/format";
 
-// An instrument-cluster plate: each digit is a drum that rolls into place when the value changes.
+// Paper drums in a row: each digit rolls into place when the value changes. The last drum is amber, as on a real counter.
 export function Odometer({ value }: { value: number }) {
   const digits = String(value).padStart(6, "0").split("");
+  const lead = digits.length - String(value).length;
   return (
-    <div className="rounded-2xl bg-[#2b241d] p-4 shadow-[inset_0_2px_6px_rgb(0_0_0/0.45),0_10px_24px_-12px_rgb(138_77_16/0.55)]">
+    <div className="flex items-end gap-[3px] font-mono text-[30px] leading-none font-medium">
       <p className="sr-only">{formatKm(value)}</p>
-      <div aria-hidden className="flex items-end justify-between gap-3">
-        <div className="figures flex gap-1 text-5xl leading-none font-semibold text-[#f2a65a]">
-          {digits.map((ch, i) => (
-            <span
-              key={digits.length - i}
-              className="relative inline-block h-[1.15em] w-[0.72em] overflow-hidden rounded-md bg-[#1c1712] shadow-[inset_0_6px_8px_-4px_rgb(0_0_0/0.8),inset_0_-6px_8px_-4px_rgb(0_0_0/0.8)]"
-            >
-              <span
-                className="flex flex-col items-center transition-transform duration-[450ms] ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none"
-                style={{ transform: `translateY(-${Number(ch) * 1.15}em)` }}
-              >
-                {Array.from({ length: 10 }, (_, n) => (
-                  <span key={n} className={`flex h-[1.15em] items-center ${i < digits.length - String(value).length ? "opacity-35" : ""}`}>
-                    {n}
-                  </span>
-                ))}
+      {digits.map((ch, i) => (
+        <span
+          key={digits.length - i}
+          aria-hidden
+          className={`relative inline-block h-[1.2em] w-[0.78em] overflow-hidden rounded-[4px] border border-line bg-card ${
+            i === digits.length - 1 ? "text-accent" : i < lead ? "text-line" : "text-ink"
+          }`}
+        >
+          <span
+            className="flex flex-col items-center transition-transform duration-[450ms] ease-[cubic-bezier(.2,.8,.2,1)] motion-reduce:transition-none"
+            style={{ transform: `translateY(-${Number(ch) * 1.2}em)` }}
+          >
+            {Array.from({ length: 10 }, (_, n) => (
+              <span key={n} className="flex h-[1.2em] items-center">
+                {n}
               </span>
-            </span>
-          ))}
-        </div>
-        <span className="pb-1 text-sm font-medium tracking-wide text-[#b5a796]">km</span>
-      </div>
+            ))}
+          </span>
+        </span>
+      ))}
+      <span aria-hidden className="label ml-1.5 pb-1 !text-[11px]">
+        km
+      </span>
     </div>
   );
 }

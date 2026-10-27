@@ -83,7 +83,7 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 
 ## 6. Screens (Spanish UI)
 
-1. **Inicio** — current km + "Actualizar km" (single-field form); Vencido list, then Próximo list with remaining km/time; collapsed "Todo al día"; primary "+ Registrar servicio".
+1. **Inicio ("Bitácora")** — the answer first ("15 pendientes." / "Todo en orden." plus where to start), current km + "Actualizar km", primary "Registrar servicio", then the car index: a top-down drawing of the car with one marker per zone (Motor, Fluidos y batería, Llantas y frenos, Cabina, Carrocería) next to a legend; tapping a zone filters the lists. "Para el taller" lists pending items numbered, with remaining km/time and life used; "Al día" is collapsed.
 2. **Registrar servicio** — date, km (prefilled current), taller, costo total; checklist of maintenance items (Vencido/Próximo first) with optional per-item cost; attach files (camera-friendly input). Save = one transaction creating service + service_items + odometer reading (source `service`); then upload files.
 3. **Historial** — services newest first (date, km, taller, total, items); filter by maintenance item; spend totals (this year, all-time). Detail page lists items and attachments (open via signed URL, delete).
 4. **Plan de mantenimiento** — items with intervals, last done, next due; edit intervals, deactivate, add custom items. Items from the manual show a "Manual Mazda" tag; edits are always allowed.
@@ -95,10 +95,10 @@ Follows the licon-craft family rules (warm ground, calm hierarchy, honest copy).
 
 - **Signature colour:** motor-oil amber `#B86A1B` (darker `#8A4D10` for text contrast). Used only for the current km, the primary action and Próximo items. Vencido = muted brick red. OK = quiet sage. Not Mazda Soul Red.
 - **Ground and ink:** bone `#F5F1EA` and warm near-black text. Light theme only.
-- **Type:** Barlow (UI) + Barlow Semi Condensed with tabular figures (km, MXN, dates), via Google Fonts.
+- **Type:** Barlow (UI) + Barlow Semi Condensed with tabular figures (km, MXN, dates), via Google Fonts. Inicio adds a logbook voice: Newsreader (serif, for answers and item names) and IBM Plex Mono (labels, the odometer and remaining figures).
 - **Signature moment:** the odometer. On Inicio the current km is the largest element, shown as odometer digits. Saving "Actualizar km" rolls the digits to the new value (~400 ms), then the due list re-sorts calmly. With reduced motion turned on, the value simply changes.
 - **Name and tone:** Pitstop. Copy reads like a straight-talking mechanic friend, e.g. "Te faltan 800 km para el cambio de aceite", "Todo al día. Nos vemos en 3 meses".
-- **Hierarchy on Inicio:** km, then one summary line ("2 pendientes" or "Todo al día"), then the list. One primary action: "+ Registrar servicio".
+- **Hierarchy on Inicio:** the summary sentence is the largest element, then km, then the one primary action "Registrar servicio", then the car index and lists. Life-used bars shade from sage to amber to rust as an item nears and passes its limit.
 - **Honest numbers:** intervals show their source ("Manual Mazda · p. 6-13"). Money is MXN (`$1,850.00`). Dates are DD/MM/YYYY.
 - **Written states:**
   - First run: "Sin servicios todavía. Registra el último que recuerdes y empezamos desde ahí."

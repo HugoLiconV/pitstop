@@ -27,6 +27,8 @@
   --color-ok: var(--ok);
   --font-sans: var(--font-ui);
   --font-figures: var(--font-figures);
+  --font-serif: var(--font-newsreader), Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 }
 
 body {
@@ -38,6 +40,20 @@ body {
 .figures {
   font-family: var(--font-figures), var(--font-ui), sans-serif;
   font-variant-numeric: tabular-nums;
+}
+
+/* Small uppercase mono label used for section heads and captions. */
+@utility label {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
 }
 
 @layer components {
