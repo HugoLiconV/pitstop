@@ -1,26 +1,54 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f5f1ea;
+  --card: #fbf8f3;
+  --ink: #2a241d;
+  --muted: #7a7064;
+  --line: #e4ddd1;
+  --accent: #b86a1b;
+  --accent-ink: #8a4d10;
+  --due-soon: var(--accent-ink);
+  --overdue: #a3402e;
+  --ok: #5f7a5a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #1f1b17;
+    --card: #2a2520;
+    --ink: #efe8dd;
+    --muted: #a89d8f;
+    --line: #3a332c;
+    --accent: #d98a3a;
+    --accent-ink: #e9a35c;
+    --overdue: #e07a66;
+    --ok: #9cb895;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-due-soon: var(--due-soon);
+  --color-overdue: var(--overdue);
+  --color-ok: var(--ok);
+  --font-sans: var(--font-ui);
+  --font-figures: var(--font-figures);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui), system-ui, sans-serif;
+}
+
+.figures {
+  font-family: var(--font-figures), var(--font-ui), sans-serif;
+  font-variant-numeric: tabular-nums;
 }
