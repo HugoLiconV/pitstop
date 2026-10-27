@@ -16,7 +16,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
           <AuthGate>{children}</AuthGate>
         </Suspense>
       </main>
-      <BottomNav />
+      <Suspense fallback={null}>
+        <BottomNav />
+      </Suspense>
     </div>
   );
 }
