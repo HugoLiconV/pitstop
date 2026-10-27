@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pitstop
 
-## Getting Started
+Mantenimiento de mi Mazda 6 2015: qué toca, qué ya se hizo y cuánto ha costado.
+Single-user, Spanish UI, $0 to run (Vercel Hobby + Supabase Free).
 
-First, run the development server:
+Design spec: `docs/superpowers/specs/2026-10-26-pitstop-design.md`
+
+## Local development
+
+Requires Docker (for local Supabase) and pnpm.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
+pnpm supabase start          # ports 5532x; applies migrations and supabase/seed.sql
+cp .env.example .env.local   # fill with the local URL (http://127.0.0.1:55321) and anon key from `pnpm supabase status`
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Local login: `dev@pitstop.local` / `pitstop-dev` (created by `supabase/seed.sql`, local only).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Tests: `pnpm test` (Vitest) and `pnpm supabase test db` (RLS, pgTAP).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Production setup (one time)
 
-## Learn More
+1. **Supabase:** create a free project. Link it with `pnpm supabase link --project-ref <ref>` and run `pnpm supabase db push`.
+2. **Auth:** under Authentication → Sign In / Providers, turn off "Allow new users to sign up". Create your user under Authentication → Users.
+3. **Seed your car:** in the SQL editor, run
+   `select seed_pitstop('<your user id>', <current km>, '<YYYY-MM-DD purchase or start date>');`
+   Past services can then be added from the app; old dates and lower km are accepted.
+4. **Vercel:** import the GitHub repo and set these environment variables:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `CRON_SECRET` (any long random string)
 
-To learn more about Next.js, take a look at the following resources:
+   Then deploy. `vercel.json` schedules a weekly keep-alive to `/api/cron/keepalive`, so the free database doesn't pause.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Free-tier limits worth knowing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Supabase Storage: 1 GB in total for receipts. Each file is limited to 10 MB.
+- Supabase pauses a free project after 7 idle days. The weekly cron prevents this.
