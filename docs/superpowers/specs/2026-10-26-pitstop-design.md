@@ -94,7 +94,7 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 Follows the licon-craft family rules (warm ground, calm hierarchy, honest copy). Pitstop's own character:
 
 - **Signature colour:** motor-oil amber `#B86A1B` (darker `#8A4D10` for text contrast). Used only for the current km, the primary action and Próximo items. Vencido = muted brick red. OK = quiet sage. Not Mazda Soul Red.
-- **Ground and ink:** bone `#F5F1EA` and warm near-black text. Dark mode uses warm charcoal.
+- **Ground and ink:** bone `#F5F1EA` and warm near-black text. Light theme only.
 - **Type:** Barlow (UI) + Barlow Semi Condensed with tabular figures (km, MXN, dates), via Google Fonts.
 - **Signature moment:** the odometer. On Inicio the current km is the largest element, shown as odometer digits. Saving "Actualizar km" rolls the digits to the new value (~400 ms), then the due list re-sorts calmly. With reduced motion turned on, the value simply changes.
 - **Name and tone:** Pitstop. Copy reads like a straight-talking mechanic friend, e.g. "Te faltan 800 km para el cambio de aceite", "Todo al día. Nos vemos en 3 meses".
