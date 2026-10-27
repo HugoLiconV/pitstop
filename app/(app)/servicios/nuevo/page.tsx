@@ -1,9 +1,11 @@
+import { Suspense } from "react";
+import Loading from "../../loading";
 import { getDueSummary } from "@/lib/data/due";
 import { todayInMexico } from "@/lib/due";
 import { requireUser } from "@/lib/supabase/server";
 import { ServiceForm } from "./service-form";
 
-export default async function NuevoServicio() {
+async function NuevoServicioContent() {
   const [user, { currentKm, due, items }] = await Promise.all([requireUser(), getDueSummary()]);
   const statusById = new Map(due.map((d) => [d.item.id, d.status]));
   // Vencido and Próximo first (already sorted by computeDue), then the rest of the active items.
@@ -17,4 +19,8 @@ export default async function NuevoServicio() {
       {inactive > 0 && <p className="text-xs text-muted">{inactive} mantenimientos desactivados no aparecen aquí.</p>}
     </div>
   );
+}
+
+export default function NuevoServicio() {
+  return <Suspense fallback={<Loading />}><NuevoServicioContent /></Suspense>;
 }

@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import Loading from "../loading";
 import { getDueSummary } from "@/lib/data/due";
 import { formatDate, formatKm, formatRemaining } from "@/lib/format";
 import { setItemActive } from "./actions";
@@ -8,7 +10,7 @@ function intervalText(km: number | null, months: number | null): string {
   return `Cada ${parts.join(" o ")}`;
 }
 
-export default async function Plan() {
+async function PlanContent() {
   const { items, due } = await getDueSummary();
   const dueById = new Map(due.map((d) => [d.item.id, d]));
   const sorted = [...items].sort((a, b) => Number(b.active) - Number(a.active));
@@ -66,4 +68,8 @@ export default async function Plan() {
       </ul>
     </div>
   );
+}
+
+export default function Plan() {
+  return <Suspense fallback={<Loading />}><PlanContent /></Suspense>;
 }

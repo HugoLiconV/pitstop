@@ -1,5 +1,6 @@
 "use client";
 
+import { KmInput } from "@/components/km-input";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import type { DueStatus } from "@/lib/due";
@@ -15,7 +16,7 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
   const router = useRouter();
   const [state, action, pending] = useActionState(createService, {});
   const [files, setFiles] = useState<File[]>([]);
-  const [checked, setChecked] = useState<Set<string>>(new Set());
+  const [checked, setChecked] = useState<Set<string>>(() => new Set());
   const [uploading, setUploading] = useState(false);
   // One token per form: retries and double taps resolve to the same service on the server.
   const [clientToken] = useState(() => crypto.randomUUID());
@@ -76,7 +77,7 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
         </label>
         <label className="flex flex-col gap-1 text-sm text-muted">
           Kilometraje
-          <input name="km" type="number" inputMode="numeric" min={0} required defaultValue={currentKm} className="field figures" />
+          <KmInput initialValue={currentKm} />
         </label>
       </div>
       {err.km && (

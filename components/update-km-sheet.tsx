@@ -3,28 +3,38 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { updateKm } from "@/app/(app)/odometro/actions";
 
-export function UpdateKmSheet({ currentKm }: { currentKm: number }) {
+export function UpdateKmSheet({ currentKm, children }: { currentKm: number; children?: React.ReactNode }) {
   const [state, action, pending] = useActionState(updateKm, {});
   // The sheet is open while no save has happened since it was opened.
   const [openedAt, setOpenedAt] = useState<number | null>(null);
   const open = openedAt !== null && (state.savedAt ?? 0) < openedAt;
   const setOpen = (value: boolean) => setOpenedAt(value ? Date.now() : null);
   const input = useRef<HTMLInputElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     if (open) input.current?.focus();
+    else if (wasOpen.current) trigger.current?.focus();
+    wasOpen.current = open;
   }, [open]);
 
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="btn-quiet">
-        Actualizar km
+      <button
+        ref={trigger}
+        type="button"
+        aria-label="Actualizar kilometraje"
+        onClick={() => setOpen(true)}
+        className="-mx-2 inline-flex cursor-pointer px-2 py-1 text-inherit transition-colors hover:bg-current/10 focus-visible:outline-2 focus-visible:outline-accent"
+      >
+        {children ?? "Actualizar"}
       </button>
     );
   }
 
   return (
-    <form action={action} className="flex basis-full flex-col gap-3 rounded-xl border border-line bg-card p-4">
+    <form action={action} onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }} className="absolute right-0 top-full z-20 mt-2 flex w-[min(22rem,calc(100vw-40px))] flex-col gap-3 border border-ink bg-card p-4 text-left shadow-lg">
       <label className="flex flex-col gap-1 text-sm text-muted">
         Kilometraje actual
         <input

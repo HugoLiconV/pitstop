@@ -1,148 +1,82 @@
 "use client";
 
-import { useState } from "react";
-import { DueList } from "@/components/due-list";
+import Link from "next/link";
+import { useId, useState } from "react";
+import { DueList, formatInterval } from "@/components/due-list";
+import { formatRemaining } from "@/lib/format";
 import { summarizeZones, zoneOf, type DueStatus, type ItemDue, type ZoneId } from "@/lib/due";
 
-const dot: Record<DueStatus, string> = { vencido: "fill-overdue", proximo: "fill-due-soon", ok: "fill-ok" };
-const bg: Record<DueStatus, string> = { vencido: "bg-overdue", proximo: "bg-due-soon", ok: "bg-ok" };
-const text: Record<DueStatus, string> = { vencido: "text-overdue", proximo: "text-due-soon", ok: "text-muted" };
-
-// Where each zone's marker sits on the top-down drawing (viewBox units).
-const SPOTS: Record<ZoneId, [number, number][]> = {
-  motor: [[120, 92]],
-  fluidos: [[164, 52]],
-  ruedas: [[47, 92], [193, 92], [47, 341], [193, 341]],
-  cabina: [[120, 246]],
-  carroceria: [[120, 372]],
-};
-
-/** The car is the index: tap a zone on the drawing or in the legend and the lists below follow. */
-export function CarIndex({ due }: { due: ItemDue[] }) {
+export function CarIndex({ due, children, hasServices }: { due: ItemDue[]; children: React.ReactNode; hasServices: boolean }) {
   const [zone, setZone] = useState<ZoneId | null>(null);
+  const headingId = useId();
   const zones = summarizeZones(due);
-  const toggle = (id: ZoneId) => setZone((z) => (z === id ? null : id));
+  const shown = zone ? due.filter(item => zoneOf(item.item.name) === zone) : due;
+  const pending = shown.filter(item => item.status !== "ok");
+  const ok = shown.filter(item => item.status === "ok");
+  const groups = groupByRemaining(pending);
+  const first = groups[0];
+  const sameInterval = first && new Set(first.items.map(formatInterval)).size === 1;
 
-  const shown = zone ? due.filter((d) => zoneOf(d.item.name) === zone) : due;
-  const pending = shown.filter((d) => d.status !== "ok");
-  const ok = shown.filter((d) => d.status === "ok");
-  const title = zones.find((z) => z.id === zone)?.title;
-
-  return (
-    <>
-      <section className="grid grid-cols-[132px_1fr] items-center gap-5 rounded-2xl border border-line bg-card p-4">
-        <svg viewBox="20 6 200 430" className="h-[260px] w-full" role="group" aria-label="Plano del auto por zonas">
-          <CarDrawing />
-          {zones.map((z) => {
-            const on = zone === z.id;
-            return (
-              <g
-                key={z.id}
-                role="button"
-                tabIndex={0}
-                aria-pressed={on}
-                aria-label={z.title}
-                className="cursor-pointer outline-none [&:focus-visible_.ring]:stroke-accent"
-                onClick={() => toggle(z.id)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    toggle(z.id);
-                  }
-                }}
-              >
-                {SPOTS[z.id].map(([x, y]) => (
-                  <g key={`${x}-${y}`}>
-                    <circle cx={x} cy={y} r={22} fill="transparent" />
-                    {z.worst === "vencido" && !zone && (
-                      <circle cx={x} cy={y} r={7} className={`${dot[z.worst]} origin-center [transform-box:fill-box] motion-safe:animate-[ping_2.4s_ease-out_infinite]`} />
-                    )}
-                    <circle cx={x} cy={y} r={13} fill="none" strokeWidth={2} className={`ring ${on ? "stroke-accent" : "stroke-transparent"}`} />
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r={7.5}
-                      strokeWidth={2.5}
-                      className={`stroke-card transition-opacity ${dot[z.worst]} ${zone && !on ? "opacity-35" : ""}`}
-                    />
-                  </g>
-                ))}
-              </g>
-            );
-          })}
-        </svg>
-
-        <ul className="flex flex-col">
-          <li>
-            <button
-              onClick={() => setZone(null)}
-              aria-pressed={!zone}
-              className={`label flex w-full items-center justify-between border-b border-line py-2 !text-[11px] !tracking-[0.12em] ${zone ? "" : "!text-ink font-medium"}`}
-            >
-              Todo <span>{due.length}</span>
-            </button>
-          </li>
-          {zones.map((z) => {
-            const on = zone === z.id;
-            return (
-              <li key={z.id}>
-                <button
-                  onClick={() => toggle(z.id)}
-                  aria-pressed={on}
-                  className={`flex w-full items-center gap-2 border-b border-line py-2 text-left text-[14px] ${zone && !on ? "text-muted" : ""}`}
-                >
-                  <span className={`size-2 shrink-0 rounded-full ${bg[z.worst]}`} />
-                  <span className={`flex-1 font-serif ${on ? "font-medium" : ""}`}>{z.title}</span>
-                  <span className={`font-mono text-[11px] ${z.pending ? text[z.worst] : "text-muted"}`}>
-                    {z.pending ? `${z.pending}/${z.total}` : z.total}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
+  if (!hasServices) {
+    const reference = due.filter(({ item }) => item.intervalKm === 10_000 && item.intervalMonths === 6);
+    return <>
+      {children}
+      <section className="panel mt-3 px-5 pt-5 pb-4">
+        <div className="flex items-center justify-between gap-4 pb-4"><h2 className="text-[22px] font-light tracking-[-0.035em]">Mantenimiento base</h2><Link href="/plan" aria-label="Plan completo" className="orb !bg-bg hover:!bg-line"><svg aria-hidden viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d="M7 17 17 7M8 7h9v9" /></svg></Link></div>
+        <p className="text-[30px] font-light leading-none tracking-[-0.04em]">10,000 <span className="text-[12px] font-normal tracking-normal text-muted">km</span><span className="mx-3 text-[12px] font-normal text-muted">/</span>6 <span className="text-[12px] font-normal tracking-normal text-muted">meses</span></p>
+        <p className="mt-2 mb-5 max-w-64 text-[11px] leading-relaxed text-muted">Cada intervalo, lo que ocurra primero. Tu último servicio es el punto de partida para calcular el próximo.</p>
+        <div className="grid grid-cols-[80px_1fr] gap-3 border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted"><span>Operación</span><span>Elemento</span></div>
+        <ul>
+          {[...reference].sort((a,b) => Number(b.item.name.startsWith("Cambio de ")) - Number(a.item.name.startsWith("Cambio de "))).map(item => <li key={item.item.id} className="grid min-h-13 grid-cols-[80px_1fr] items-baseline gap-3 border-b border-line py-4 last:border-0"><span className="chip !px-2.5 !py-1 justify-self-start">{item.item.name.startsWith("Cambio de ") ? "Cambiar" : "Revisar"}</span><span className="text-[13px] leading-relaxed">{item.item.name.replace(/^(Inspección de |Cambio de )/, "").replace(/^./, char => char.toUpperCase())}</span></li>)}
         </ul>
+        <p className="mt-4 text-[11px] leading-relaxed text-muted">Las fechas de este plan se ajustarán con tu primer registro.</p>
       </section>
+    </>;
+  }
 
-      {pending.length > 0 && (
-        <section key={`pending-${zone}`} className="flex flex-col">
-          <h2 className="label flex items-baseline justify-between border-b border-ink pb-2">
-            <span>Para el taller{title ? ` · ${title}` : ""}</span>
-            <span>{pending.length}</span>
-          </h2>
-          <DueList items={pending} />
-        </section>
-      )}
+  return <>
+    {children}
+    <div className="mt-7 flex items-center justify-between gap-3">
+      <h2 id={headingId} className="text-[26px] font-light tracking-[-0.04em]">Próxima visita</h2>
+      <div className="relative">
+        <select aria-label="Filtrar por sistema" value={zone ?? ""} onChange={event => { setZone(event.target.value as ZoneId || null); }} className="max-w-[110px] cursor-pointer appearance-none bg-transparent py-2 pr-6 text-right text-[11px] text-muted focus-visible:outline-2 focus-visible:outline-accent">
+          <option value="">Todo el auto</option>
+          {zones.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}
+        </select>
+        <svg aria-hidden viewBox="0 0 16 16" className="pointer-events-none absolute top-1/2 right-0 size-3 -translate-y-1/2 fill-none stroke-current stroke-[1.5]"><path d="m4 6 4 4 4-4" /></svg>
+      </div>
+    </div>
+    {first && <section key={`${zone}-${first.label}`} aria-labelledby={headingId} className="panel mt-2 p-2 pb-1 [&_ol]:px-3">
+      <div className="mb-3 rounded-[22px] bg-ink px-5 py-5 text-card">
+        <p className="mb-2 text-[10px] tracking-[0.08em] uppercase opacity-60">{first.items.some(item => !item.last) ? "Plan estimado · frecuencia" : first.label}</p>
+        <p className="text-[26px] font-semibold leading-none tracking-[-0.02em]">{sameInterval ? formatInterval(first.items[0]) : "Según tu plan"}</p>
+      </div>
+      <DueList items={first.items} grouped={first.status === "vencido"} sharedInterval={sameInterval} />
+    </section>}
 
-      {ok.length > 0 && (
-        <details key={`ok-${zone}`} className="group" open={pending.length === 0}>
-          <summary className="label flex cursor-pointer list-none items-baseline justify-between border-b border-line pb-2 [&::-webkit-details-marker]:hidden">
-            <span>Al día · {ok.length}</span>
-            <span aria-hidden className="transition-transform group-open:rotate-180 motion-reduce:transition-none">
-              ⌄
-            </span>
-          </summary>
-          <DueList items={ok} start={pending.length + 1} />
-        </details>
-      )}
-    </>
-  );
+    <div className="mt-3 mb-5">
+      {!hasServices && <p className="mb-3 text-[12px] leading-relaxed text-muted">Sin historial aún. Registra tu último servicio para precisar qué toca.</p>}
+      <Link href="/servicios/nuevo" className="btn-primary justify-between !pr-2">Registrar servicio<span aria-hidden className="inline-flex size-9 items-center justify-center rounded-full bg-card text-ink"><svg viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d="M7 17 17 7M8 7h9v9" /></svg></span></Link>
+    </div>
+
+    {groups.length > 1 && <details className="group/rest mt-0 border-b border-line">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-[14px] [&::-webkit-details-marker]:hidden"><span>Otros pendientes</span><span className="ml-auto font-mono text-[12px] text-muted">{pending.length - first.items.length}</span><svg aria-hidden viewBox="0 0 16 16" className="size-3 fill-none stroke-current stroke-[1.5] transition-transform group-open/rest:rotate-180"><path d="m4 6 4 4 4-4" /></svg></summary>
+      {groups.slice(1).map((group, index) => <section key={group.label} className="pb-4"><h3 className="py-2 text-[13px] text-muted">{group.items.some(item => !item.last) ? "Sin registro previo · " : ""}{group.label}</h3><DueList items={group.items} start={1 + groups.slice(0, index + 1).reduce((count, previous) => count + previous.items.length, 0)} grouped={group.status === "vencido"} /></section>)}
+    </details>}
+    {ok.length > 0 && <details key={`ok-${zone}`} className="group/ok border-b border-line" open={!first}>
+      <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-[14px] [&::-webkit-details-marker]:hidden"><span>Al día</span><span className="ml-auto font-mono text-[12px] text-muted">{ok.length}</span><svg aria-hidden viewBox="0 0 16 16" className="size-3 fill-none stroke-current stroke-[1.5] transition-transform group-open/ok:rotate-180"><path d="m4 6 4 4 4-4" /></svg></summary>
+      <DueList items={ok} start={pending.length + 1} />
+    </details>}
+  </>;
 }
 
-function CarDrawing() {
-  return (
-    <g className="fill-none stroke-ink" strokeLinejoin="round" strokeLinecap="round">
-      {[[40, 70], [186, 70], [40, 319], [186, 319]].map(([x, y]) => (
-        <rect key={`${x}-${y}`} x={x} y={y} width={14} height={44} rx={5} className="fill-ink stroke-none" />
-      ))}
-      <path
-        className="fill-card"
-        strokeWidth={1.7}
-        d="M120 14 C152 14 177 22 185 46 C190 72 191 112 191 152 L191 300 C191 342 189 382 183 399 C177 416 150 424 120 424 C90 424 63 416 57 399 C51 382 49 342 49 300 L49 152 C49 112 50 72 55 46 C63 22 88 14 120 14 Z"
-      />
-      <path strokeWidth={0.8} opacity={0.45} d="M78 34 C80 70 82 110 84 152 M162 34 C160 70 158 110 156 152 M76 342 C90 346 150 346 164 342 M72 396 C90 402 150 402 168 396" />
-      <path strokeWidth={1.1} d="M58 44 C66 32 82 28 96 28 C90 36 76 44 58 52 Z M182 44 C174 32 158 28 144 28 C150 36 164 44 182 52 Z" />
-      <path strokeWidth={1.5} className="fill-ink/5" d="M72 158 H168 L160 200 H80 Z M78 296 H162 L170 328 H70 Z" />
-      <path strokeWidth={1.5} d="M80 200 H160 L162 296 H78 Z" />
-    </g>
-  );
+function groupByRemaining(items: ItemDue[]) {
+  const groups: { label: string; status: DueStatus; items: ItemDue[] }[] = [];
+  for (const item of items) {
+    const label = item.status === "vencido" ? formatRemaining(item) : "Próximos";
+    const group = groups.find(group => group.label === label);
+    if (group) group.items.push(item);
+    else groups.push({ label, status: item.status, items: [item] });
+  }
+  return groups;
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Barlow, Barlow_Semi_Condensed, IBM_Plex_Mono, Newsreader } from "next/font/google";
+import { Geist, Barlow_Semi_Condensed, IBM_Plex_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 
-const barlow = Barlow({
+const barlow = Geist({
   variable: "--font-ui",
   subsets: ["latin"],
   weight: ["400", "500", "600"],

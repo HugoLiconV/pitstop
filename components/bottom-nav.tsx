@@ -3,64 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const icons = {
-  gauge: (
-    <path d="M4.5 16.5a8 8 0 1 1 15 0M12 12l4-3.5M12 12a1.25 1.25 0 1 0 0 .01" />
-  ),
-  history: (
-    <path d="M4 12a8 8 0 1 0 2.35-5.65M4 4v4h4M12 8v4l3 2" />
-  ),
-  wrench: (
-    <path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.4 2.4-2.6-.6-.6-2.6 2.4-2.4Z" />
-  ),
-};
-
 const tabs = [
-  { href: "/", label: "Inicio", icon: icons.gauge, match: (p: string) => p === "/" || p.startsWith("/servicios") },
-  { href: "/historial", label: "Historial", icon: icons.history, match: (p: string) => p.startsWith("/historial") },
-  { href: "/plan", label: "Plan", icon: icons.wrench, match: (p: string) => p.startsWith("/plan") },
+  { href: "/", label: "Inicio", icon: "m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9", match: (path: string) => path === "/" || path.startsWith("/servicios") },
+  { href: "/historial", label: "Historial", icon: "M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9Zm0 4v5l3 2", match: (path: string) => path.startsWith("/historial") },
+  { href: "/plan", label: "Plan", icon: "M6 3h9l4 4v14H6zM14 3v5h5M9 12h7M9 16h7", match: (path: string) => path.startsWith("/plan") },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
-  return (
-    <nav
-      aria-label="Principal"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
-    >
-      <ul className="mx-auto grid max-w-md grid-cols-3">
-        {tabs.map((t) => {
-          const active = t.match(pathname);
-          return (
-            <li key={t.href}>
-              <Link
-                href={t.href}
-                aria-current={active ? "page" : undefined}
-                className={`relative flex flex-col items-center gap-1 pt-3 pb-2.5 text-xs transition-colors ${
-                  active ? "font-semibold text-ink" : "text-muted hover:text-ink"
-                }`}
-              >
-                <span
-                  aria-hidden
-                  className={`absolute top-0 h-[3px] w-10 rounded-b-full bg-accent transition-transform duration-200 motion-reduce:transition-none ${
-                    active ? "scale-x-100" : "scale-x-0"
-                  }`}
-                />
-                <svg
-                  aria-hidden
-                  viewBox="0 0 24 24"
-                  className={`size-6 fill-none stroke-current stroke-[1.75] ${active ? "text-accent" : ""}`}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  {t.icon}
-                </svg>
-                {t.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-  );
+  return <nav aria-label="Principal" className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg via-bg/85 to-transparent px-5 pt-8 pb-[calc(env(safe-area-inset-bottom)+14px)]">
+    <ul className="mx-auto grid max-w-[340px] grid-cols-3 gap-1 rounded-full bg-[#d6d3cc]/80 p-1.5 shadow-[0_18px_36px_-14px_rgb(50_40_30/0.5),0_0_0_1px_rgb(255_255_255/0.5)_inset] backdrop-blur-xl">
+      {tabs.map(tab => { const active = tab.match(pathname); return <li key={tab.href}><Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-11 items-center justify-center gap-2 rounded-full text-[12px] transition-colors focus-visible:outline-2 focus-visible:outline-accent ${active ? "bg-ink font-medium text-card" : "text-muted hover:text-ink"}`}><svg aria-hidden viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d={tab.icon} /></svg>{tab.label}</Link></li>; })}
+    </ul>
+  </nav>;
 }

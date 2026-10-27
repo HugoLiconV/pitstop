@@ -1,76 +1,36 @@
+import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
+import Loading from "./loading";
 import { CarIndex } from "@/components/car-index";
 import { Odometer } from "@/components/odometer";
 import { UpdateKmSheet } from "@/components/update-km-sheet";
 import { getDueSummary } from "@/lib/data/due";
-import { formatRemaining } from "@/lib/format";
 
-const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
-
-export default async function Inicio() {
+async function InicioContent() {
   const { currentKm, due, hasServices } = await getDueSummary();
-  const items = due.filter((d) => d.item.active);
-  const pending = items.filter((d) => d.status !== "ok");
-  const overdue = pending.some((d) => d.status === "vencido");
-  const first = pending[0];
-  const next = items.find((d) => d.status === "ok");
+  const items = due.filter(item => item.item.active);
 
-  return (
-    <div className="-mt-2 flex flex-col gap-7">
-      <header className="label flex items-center justify-between border-b border-ink pb-3">
-        <span>Bitácora · Mazda 6</span>
-        <span>2015 · Grand Touring Plus</span>
-      </header>
+  const summary = <>
+    <header className="flex items-center justify-between gap-4">
+      <span className="text-[22px] font-semibold tracking-[-0.06em]">pitstop<span className="text-accent">/</span></span>
+      <span className="label">Bitácora personal</span>
+    </header>
+    <section className="panel relative mt-5 overflow-hidden px-5 pt-6 pb-5">
+      <h1 className="text-[34px] font-light leading-none tracking-[-0.045em]">Mazda 6</h1>
+      <div className="mt-3 flex flex-wrap gap-1.5"><span className="chip">2015</span><span className="chip">Grand Touring Plus</span></div>
+      <Image src="/mazda6-manual.png" alt="" width={1828} height={860} priority className="pointer-events-none mx-auto mt-3 w-[94%] mix-blend-multiply" />
+      <div className="relative mt-1 flex items-end justify-between gap-3">
+        <div><p className="label mb-1">Kilometraje actual</p><UpdateKmSheet currentKm={currentKm}><Odometer value={currentKm} /></UpdateKmSheet></div>
+      </div>
+      <p className="mt-4 flex items-center gap-2 text-[11px] text-muted"><span aria-hidden className="size-1.5 rounded-full bg-accent" />{hasServices ? "Tu bitácora, al día con cada visita." : "Sin servicios registrados"}</p>
+      {!hasServices && <Link href="/servicios/nuevo" className="btn-primary mt-5 justify-between !pr-2">Registrar primer servicio<span aria-hidden className="inline-flex size-9 items-center justify-center rounded-full bg-card text-ink"><svg viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d="M7 17 17 7M8 7h9v9" /></svg></span></Link>}
+    </section>
+  </>;
 
-      {/* The answer first: how many, and where to start. */}
-      <section className="flex flex-col gap-3">
-        <h1 className="font-serif text-[40px] leading-[1.05] tracking-[-0.015em]">
-          {pending.length === 0 ? (
-            "Todo en orden."
-          ) : (
-            <>
-              <span className={overdue ? "text-overdue" : "text-due-soon"}>{pending.length}</span>{" "}
-              {pending.length === 1 ? "pendiente" : "pendientes"}.
-            </>
-          )}
-        </h1>
-        {first ? (
-          <p className="-mt-1 font-serif text-[19px] leading-snug text-muted italic">
-            Empieza por <span className="text-ink">{lowerFirst(first.item.name)}</span>.
-          </p>
-        ) : (
-          next && (
-            <p className="-mt-1 font-serif text-[19px] leading-snug text-muted italic">
-              Lo siguiente: <span className="text-ink">{lowerFirst(next.item.name)}</span>, {formatRemaining(next)}.
-            </p>
-          )
-        )}
-        {!hasServices && (
-          <p className="border-l-2 border-accent pl-3 font-serif text-[15px] leading-relaxed text-muted italic">
-            Aún no hay historial, así que todo se cuenta desde la compra. Registra el último servicio que recuerdes y el plan se acomoda solo.
-          </p>
-        )}
-      </section>
+  return <div className="pb-3">{items.length ? <CarIndex due={items} hasServices={hasServices}>{summary}</CarIndex> : <>{summary}<p className="my-6 text-[15px] text-muted">Tu plan está vacío. Agrega mantenimientos para saber qué toca.</p></>}</div>;
+}
 
-      <section className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1.5">
-          <span className="label">Odómetro</span>
-          <Odometer value={currentKm} />
-        </div>
-        <UpdateKmSheet currentKm={currentKm} />
-      </section>
-
-      <Link href="/servicios/nuevo" className="btn-primary text-lg">
-        Registrar servicio
-      </Link>
-
-      {items.length > 0 ? (
-        <CarIndex due={items} />
-      ) : (
-        <p className="font-serif text-[17px] text-muted italic">
-          El plan está vacío. Agrega piezas en Plan y aquí verás qué toca.
-        </p>
-      )}
-    </div>
-  );
+export default function Inicio() {
+  return <Suspense fallback={<Loading />}><InicioContent /></Suspense>;
 }

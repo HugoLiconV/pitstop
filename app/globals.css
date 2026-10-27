@@ -2,13 +2,13 @@
 
 :root {
   color-scheme: light;
-  --bg: #f5f1ea;
-  --card: #fbf8f3;
-  --ink: #2a241d;
-  --muted: #7a7064;
-  --line: #e4ddd1;
-  --accent: #b86a1b;
-  --accent-ink: #8a4d10;
+  --bg: #e7e5e0;
+  --card: #f6f5f2;
+  --ink: #1d1c1a;
+  --muted: #7d7a73;
+  --line: #d9d6cf;
+  --accent: #e8622a;
+  --accent-ink: #c44e1c;
   --due-soon: var(--accent-ink);
   --overdue: #a3402e;
   --ok: #5f7a5a;
@@ -46,9 +46,9 @@ body {
 @utility label {
   font-family: var(--font-plex-mono), ui-monospace, monospace;
   font-size: 10.5px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--muted);
+  color: color-mix(in oklab, var(--muted) 70%, var(--ink));
 }
 
 @keyframes rise {
@@ -58,12 +58,18 @@ body {
 
 @layer components {
   .field {
-    @apply rounded-lg border border-line bg-card px-3 py-2.5 text-base text-ink outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30;
+    @apply rounded-2xl border border-line bg-card px-4 py-3 text-base text-ink outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30;
   }
   .btn-primary {
-    @apply rounded-xl bg-accent px-4 py-3.5 text-center font-semibold text-white shadow-[0_6px_16px_-8px_rgb(138_77_16/0.7)] active:translate-y-px transition-colors hover:bg-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60;
+    @apply flex h-13 items-center justify-center rounded-full bg-ink px-6 text-center text-[15px] font-medium text-card shadow-[0_8px_20px_-10px_rgb(29_28_26/0.6)] active:translate-y-px transition-colors hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60;
   }
   .btn-quiet {
-    @apply rounded-lg border border-line bg-card px-3 py-2 text-sm font-medium text-ink hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-accent;
+    @apply rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-ink hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-accent;
   }
+}
+
+@layer components {
+  .panel { @apply rounded-[28px] bg-card shadow-[0_1px_0_rgb(255_255_255/0.8)_inset,0_12px_30px_-22px_rgb(60_50_40/0.35)]; }
+  .chip { @apply inline-flex items-center rounded-full bg-bg/70 px-3 py-1.5 text-[11px] text-muted; }
+  .orb { @apply inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-card text-ink shadow-[0_4px_14px_-8px_rgb(60_50_40/0.5)]; }
 }
