@@ -96,4 +96,22 @@ describe("computeDue", () => {
     });
     expect(res.map((d) => d.item.id)).toEqual(["late", "soon", "ok"]);
   });
+
+  it("reports life used as the larger of km and time fractions", () => {
+    const [d] = computeDue({
+      items: [item({ intervalKm: 10000, intervalMonths: 12 })],
+      services: [{ date: "2026-04-26", km: 60000, itemIds: ["i1"] }],
+      baseline, currentKm: 62500, today,
+    });
+    // km: 2,500 / 10,000 = 0.25; time: 183 / 365 days ≈ 0.50
+    expect(d.used).toBeCloseTo(0.5, 2);
+  });
+
+  it("caps life used at 1 when overdue", () => {
+    const [d] = computeDue({
+      items: [item({ intervalKm: 5000 })],
+      services: [], baseline, currentKm: 60000, today,
+    });
+    expect(d.used).toBe(1);
+  });
 });

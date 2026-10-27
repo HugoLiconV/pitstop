@@ -10,6 +10,7 @@ const due = (over: Partial<ItemDue>): ItemDue => ({
   nextDate: null,
   kmRemaining: null,
   daysRemaining: null,
+  used: 0,
   ...over,
 });
 

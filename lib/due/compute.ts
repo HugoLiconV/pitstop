@@ -30,6 +30,7 @@ export interface ItemDue {
   nextDate: string | null;
   kmRemaining: number | null;
   daysRemaining: number | null;
+  used: number; // 0–1, share of the interval consumed (the larger of km and time)
 }
 
 const STATUS_ORDER: Record<DueStatus, number> = { vencido: 0, proximo: 1, ok: 2 };
@@ -75,7 +76,11 @@ export function computeDue(args: {
         status = "proximo";
       }
 
-      return { item, status, last, nextKm, nextDate, kmRemaining, daysRemaining };
+      const kmUsed = item.intervalKm === null ? 0 : (currentKm - from.km) / item.intervalKm;
+      const timeUsed = nextDate === null ? 0 : daysBetween(from.date, today) / daysBetween(from.date, nextDate);
+      const used = Math.min(1, Math.max(0, kmUsed, timeUsed));
+
+      return { item, status, last, nextKm, nextDate, kmRemaining, daysRemaining, used };
     })
     .sort((a, b) => STATUS_ORDER[a.status] - STATUS_ORDER[b.status] || urgency(a) - urgency(b));
 }

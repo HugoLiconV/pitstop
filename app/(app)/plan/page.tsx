@@ -27,11 +27,17 @@ export default async function Plan() {
           const d = dueById.get(item.id);
           return (
             <li key={item.id} className={`flex flex-col gap-1.5 py-4 ${item.active ? "" : "opacity-50"}`}>
-              <p className="font-medium">{item.name}</p>
-              <p className="figures text-sm">{intervalText(item.interval_km, item.interval_months)}</p>
-              <p className="text-xs text-muted">
-                {item.source === "manual" ? `Manual Mazda · p. ${item.manual_page}` : "Personalizado"}
-              </p>
+              <div className="flex items-baseline justify-between gap-3">
+                <p className="font-medium">{item.name}</p>
+                <span
+                  className={`shrink-0 rounded-full px-2 py-0.5 text-xs ${
+                    item.source === "manual" ? "bg-accent/10 text-accent-ink" : "bg-ok/15 text-ok"
+                  }`}
+                >
+                  {item.source === "manual" ? `Manual p. ${item.manual_page}` : "Personalizado"}
+                </span>
+              </div>
+              <p className="figures text-sm font-medium">{intervalText(item.interval_km, item.interval_months)}</p>
               {d && (
                 <p className="figures text-sm text-muted">
                   {d.last ? `Último: ${formatDate(d.last.date)} · ${formatKm(d.last.km)}` : "Sin registro"} ·{" "}

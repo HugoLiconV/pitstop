@@ -45,9 +45,9 @@ body {
     @apply rounded-lg border border-line bg-card px-3 py-2.5 text-base text-ink outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30;
   }
   .btn-primary {
-    @apply rounded-lg bg-accent px-4 py-3 text-center font-semibold text-white transition-colors hover:bg-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60;
+    @apply rounded-xl bg-accent px-4 py-3.5 text-center font-semibold text-white shadow-[0_6px_16px_-8px_rgb(138_77_16/0.7)] active:translate-y-px transition-colors hover:bg-accent-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60;
   }
   .btn-quiet {
-    @apply rounded-lg border border-line px-3 py-2 text-sm text-ink hover:bg-card focus-visible:outline-2 focus-visible:outline-accent;
+    @apply rounded-lg border border-line bg-card px-3 py-2 text-sm font-medium text-ink hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-accent;
   }
 }
