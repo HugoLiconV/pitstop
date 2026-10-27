@@ -89,7 +89,26 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 4. **Plan de mantenimiento** — items with intervals, last done, next due; edit intervals, deactivate, add custom items. Items from the manual show a "Manual Mazda" tag; edits are always allowed.
 5. **Login** — email/password. Sign-up disabled in Supabase; the single account is created once from the dashboard. All other routes require a session.
 
-## 7. Attachments
+## 7. Design direction
+
+Follows the licon-craft family rules (warm ground, calm hierarchy, honest copy). Pitstop's own character:
+
+- **Signature colour:** motor-oil amber `#B86A1B` (darker `#8A4D10` for text contrast). Used only for the current km, the primary action and Próximo items. Vencido = muted brick red. OK = quiet sage. Not Mazda Soul Red.
+- **Ground and ink:** bone `#F5F1EA` and warm near-black text. Dark mode uses warm charcoal.
+- **Type:** Barlow (UI) + Barlow Semi Condensed with tabular figures (km, MXN, dates), via Google Fonts.
+- **Signature moment:** the odometer. On Inicio the current km is the largest element, shown as odometer digits. Saving "Actualizar km" rolls the digits to the new value (~400 ms), then the due list re-sorts calmly. With reduced motion turned on, the value simply changes.
+- **Name and tone:** Pitstop. Copy reads like a straight-talking mechanic friend, e.g. "Te faltan 800 km para el cambio de aceite", "Todo al día. Nos vemos en 3 meses".
+- **Hierarchy on Inicio:** km, then one summary line ("2 pendientes" or "Todo al día"), then the list. One primary action: "+ Registrar servicio".
+- **Honest numbers:** intervals show their source ("Manual Mazda · p. 6-13"). Money is MXN (`$1,850.00`). Dates are DD/MM/YYYY.
+- **Written states:**
+  - First run: "Sin servicios todavía. Registra el último que recuerdes y empezamos desde ahí."
+  - Upload failure: "No se subió la factura. El servicio sí quedó guardado. Reintentar."
+  - Offline: "Sin conexión. Tus datos están a salvo."
+  - Database paused or unreachable: a friendly retry message.
+- **Kept out:** charts, car photos or illustrations, and per-row badges or icons.
+- **Account:** login and cloud storage are a deliberate exception to local-first (phone access at the shop, receipt storage). The login screen says "Solo tú tienes acceso."
+
+## 8. Attachments
 
 - Evidence only: never parsed, never used to fill fields.
 - Private Supabase Storage bucket, path `{user_id}/{service_id}/{uuid}-{filename}`; storage RLS restricts to owner.
@@ -97,7 +116,7 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 - Viewed through short-lived signed URLs. HEIC may not preview in all browsers; it is offered as a download.
 - Free tier is 1 GB storage — acceptable for expected volume.
 
-## 8. Seed schedule (owner's manual)
+## 9. Seed schedule (owner's manual)
 
 Source: *Mazda 6 2015 Manual del propietario* (`context/6-2015-manual-del-propietario.pdf`), section 6 "Programa de mantenimiento", table **"Excepto Israel/Rusia/Bielorrusia/Azerbaiyán/Kazajistán"** (pp. 6-13 to 6-16). This is the international table that applies to Mexico. Rule: months or km, **whichever comes first**. Only SKYACTIV-G 2.5 rows apply.
 
@@ -135,20 +154,20 @@ Notes:
 - **Automatic transmission fluid** has no scheduled change in the manual and is not seeded. I can add it as a custom item.
 - The manual's inspection items are grouped above to keep the list short. They can be split or removed in the app.
 
-## 9. Error handling
+## 10. Error handling
 
 - All Server Actions validate input with Zod; field-level Spanish error messages.
 - Odometer: reject a reading lower than the latest; require explicit confirmation for a jump of more than 5,000 km.
 - Service save is a single Postgres function call (RPC) so service + items + odometer reading commit together. Attachment upload happens after; on failure the service persists and the detail page shows "reintentar adjunto".
 - Unexpected errors → `error.tsx` page in Spanish. Missing/expired session → redirect to `/login`.
 
-## 10. Testing
+## 11. Testing
 
 - **Vitest unit tests** for `lib/due/` (km-only, time-only, both; never-serviced item; Próximo thresholds; month-end clamping; inactive items excluded).
 - **Vitest unit tests** for Zod schemas (odometer rules, file type/size limits, required fields).
 - No end-to-end tests in v1.
 
-## 11. Deployment ($0)
+## 12. Deployment ($0)
 
 - Vercel Hobby connected to the GitHub repo; preview deploys on PRs.
 - Supabase Free: migrations versioned in `supabase/migrations/`, applied with the Supabase CLI.
