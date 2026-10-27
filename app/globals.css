@@ -63,6 +63,9 @@ body {
   .btn-primary {
     @apply flex h-13 items-center justify-center rounded-full bg-ink px-6 text-center text-[15px] font-medium text-card shadow-[0_8px_20px_-10px_rgb(29_28_26/0.6)] active:translate-y-px transition-colors hover:bg-ink/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-60;
   }
+  .file-pick {
+    @apply text-[13px] text-muted file:mr-3 file:h-10 file:cursor-pointer file:rounded-full file:border-0 file:bg-bg file:px-4 file:text-[13px] file:text-ink hover:file:bg-line;
+  }
   .btn-quiet {
     @apply rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-ink hover:border-accent/50 focus-visible:outline-2 focus-visible:outline-accent;
   }

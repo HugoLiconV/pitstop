@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useId, useState } from "react";
+import { Chip, Label, Orb, Panel, PanelHeader, PillAction } from "@/components/ui";
 import { DueList, formatInterval } from "@/components/due-list";
 import { formatRemaining } from "@/lib/format";
 import { summarizeZones, zoneOf, type DueStatus, type ItemDue, type ZoneId } from "@/lib/due";
@@ -21,16 +21,16 @@ export function CarIndex({ due, children, hasServices }: { due: ItemDue[]; child
     const reference = due.filter(({ item }) => item.intervalKm === 10_000 && item.intervalMonths === 6);
     return <>
       {children}
-      <section className="panel mt-3 px-5 pt-5 pb-4">
-        <div className="flex items-center justify-between gap-4 pb-4"><h2 className="text-[22px] font-light tracking-[-0.035em]">Mantenimiento base</h2><Link href="/plan" aria-label="Plan completo" className="orb !bg-bg hover:!bg-line"><svg aria-hidden viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d="M7 17 17 7M8 7h9v9" /></svg></Link></div>
+      <Panel as="section" className="mt-3 !pb-4">
+        <PanelHeader title="Mantenimiento base" action={<Orb href="/plan" label="Plan completo" />} />
         <p className="text-[30px] font-light leading-none tracking-[-0.04em]">10,000 <span className="text-[12px] font-normal tracking-normal text-muted">km</span><span className="mx-3 text-[12px] font-normal text-muted">/</span>6 <span className="text-[12px] font-normal tracking-normal text-muted">meses</span></p>
         <p className="mt-2 mb-5 max-w-64 text-[11px] leading-relaxed text-muted">Cada intervalo, lo que ocurra primero. Tu último servicio es el punto de partida para calcular el próximo.</p>
-        <div className="grid grid-cols-[80px_1fr] gap-3 border-b border-line py-2 font-mono text-[9px] uppercase tracking-[0.08em] text-muted"><span>Operación</span><span>Elemento</span></div>
+        <div className="grid grid-cols-[80px_1fr] gap-3 border-b border-line py-2"><Label as="span">Operación</Label><Label as="span">Elemento</Label></div>
         <ul>
-          {[...reference].sort((a,b) => Number(b.item.name.startsWith("Cambio de ")) - Number(a.item.name.startsWith("Cambio de "))).map(item => <li key={item.item.id} className="grid min-h-13 grid-cols-[80px_1fr] items-baseline gap-3 border-b border-line py-4 last:border-0"><span className="chip !px-2.5 !py-1 justify-self-start">{item.item.name.startsWith("Cambio de ") ? "Cambiar" : "Revisar"}</span><span className="text-[13px] leading-relaxed">{item.item.name.replace(/^(Inspección de |Cambio de )/, "").replace(/^./, char => char.toUpperCase())}</span></li>)}
+          {[...reference].sort((a,b) => Number(b.item.name.startsWith("Cambio de ")) - Number(a.item.name.startsWith("Cambio de "))).map(item => <li key={item.item.id} className="grid min-h-13 grid-cols-[80px_1fr] items-baseline gap-3 border-b border-line py-4 last:border-0"><Chip className="!px-2.5 !py-1 justify-self-start">{item.item.name.startsWith("Cambio de ") ? "Cambiar" : "Revisar"}</Chip><span className="text-[13px] leading-relaxed">{item.item.name.replace(/^(Inspección de |Cambio de )/, "").replace(/^./, char => char.toUpperCase())}</span></li>)}
         </ul>
         <p className="mt-4 text-[11px] leading-relaxed text-muted">Las fechas de este plan se ajustarán con tu primer registro.</p>
-      </section>
+      </Panel>
     </>;
   }
 
@@ -56,9 +56,10 @@ export function CarIndex({ due, children, hasServices }: { due: ItemDue[]; child
 
     <div className="mt-3 mb-5">
       {!hasServices && <p className="mb-3 text-[12px] leading-relaxed text-muted">Sin historial aún. Registra tu último servicio para precisar qué toca.</p>}
-      <Link href="/servicios/nuevo" className="btn-primary justify-between !pr-2">Registrar servicio<span aria-hidden className="inline-flex size-9 items-center justify-center rounded-full bg-card text-ink"><svg viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d="M7 17 17 7M8 7h9v9" /></svg></span></Link>
+      <PillAction href="/servicios/nuevo">Registrar servicio</PillAction>
     </div>
 
+    {(groups.length > 1 || ok.length > 0) && <div className="panel px-5 py-1 [&>details:last-child]:border-0">
     {groups.length > 1 && <details className="group/rest mt-0 border-b border-line">
       <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-[14px] [&::-webkit-details-marker]:hidden"><span>Otros pendientes</span><span className="ml-auto font-mono text-[12px] text-muted">{pending.length - first.items.length}</span><svg aria-hidden viewBox="0 0 16 16" className="size-3 fill-none stroke-current stroke-[1.5] transition-transform group-open/rest:rotate-180"><path d="m4 6 4 4 4-4" /></svg></summary>
       {groups.slice(1).map((group, index) => <section key={group.label} className="pb-4"><h3 className="py-2 text-[13px] text-muted">{group.items.some(item => !item.last) ? "Sin registro previo · " : ""}{group.label}</h3><DueList items={group.items} start={1 + groups.slice(0, index + 1).reduce((count, previous) => count + previous.items.length, 0)} grouped={group.status === "vencido"} /></section>)}
@@ -67,6 +68,7 @@ export function CarIndex({ due, children, hasServices }: { due: ItemDue[]; child
       <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 text-[14px] [&::-webkit-details-marker]:hidden"><span>Al día</span><span className="ml-auto font-mono text-[12px] text-muted">{ok.length}</span><svg aria-hidden viewBox="0 0 16 16" className="size-3 fill-none stroke-current stroke-[1.5] transition-transform group-open/ok:rotate-180"><path d="m4 6 4 4 4-4" /></svg></summary>
       <DueList items={ok} start={pending.length + 1} />
     </details>}
+    </div>}
   </>;
 }
 

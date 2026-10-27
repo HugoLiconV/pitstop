@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { Alert, Label } from "@/components/ui";
 import { updateKm } from "@/app/(app)/odometro/actions";
 
 export function UpdateKmSheet({ currentKm, children }: { currentKm: number; children?: React.ReactNode }) {
@@ -26,7 +27,7 @@ export function UpdateKmSheet({ currentKm, children }: { currentKm: number; chil
         type="button"
         aria-label="Actualizar kilometraje"
         onClick={() => setOpen(true)}
-        className="-mx-2 inline-flex cursor-pointer px-2 py-1 text-inherit transition-colors hover:bg-current/10 focus-visible:outline-2 focus-visible:outline-accent"
+        className="-mx-2 inline-flex cursor-pointer rounded-2xl px-2 py-1 text-inherit transition-colors hover:bg-bg/70 focus-visible:outline-2 focus-visible:outline-accent"
       >
         {children ?? "Actualizar"}
       </button>
@@ -34,9 +35,9 @@ export function UpdateKmSheet({ currentKm, children }: { currentKm: number; chil
   }
 
   return (
-    <form action={action} onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }} className="absolute right-0 top-full z-20 mt-2 flex w-[min(22rem,calc(100vw-40px))] flex-col gap-3 border border-ink bg-card p-4 text-left shadow-lg">
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Kilometraje actual
+    <form action={action} onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }} className="absolute left-0 top-full z-20 mt-2 flex w-[min(22rem,calc(100vw-40px))] flex-col gap-3 rounded-[24px] bg-card p-4 text-left shadow-[0_24px_50px_-20px_rgb(50_40_30/0.5),0_0_0_1px_var(--line)]">
+      <label className="flex flex-col gap-2">
+        <Label as="span">Kilometraje actual</Label>
         <input
           ref={input}
           name="km"
@@ -46,13 +47,11 @@ export function UpdateKmSheet({ currentKm, children }: { currentKm: number; chil
           required
           defaultValue={state.km ?? currentKm}
           key={state.km}
-          className="field figures text-lg"
+          className="field font-mono text-lg font-light"
         />
       </label>
       {state.error && (
-        <p role="alert" className="text-sm text-overdue">
-          {state.error}
-        </p>
+        <Alert>{state.error}</Alert>
       )}
       <div className="flex gap-2">
         {state.needsConfirm ? (
@@ -64,7 +63,7 @@ export function UpdateKmSheet({ currentKm, children }: { currentKm: number; chil
             {pending ? "Guardando…" : "Guardar"}
           </button>
         )}
-        <button type="button" onClick={() => setOpen(false)} className="btn-quiet">
+        <button type="button" onClick={() => setOpen(false)} className="btn-quiet px-5">
           Cancelar
         </button>
       </div>

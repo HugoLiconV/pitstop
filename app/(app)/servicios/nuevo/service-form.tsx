@@ -1,6 +1,7 @@
 "use client";
 
 import { KmInput } from "@/components/km-input";
+import { Alert, Field, Panel, PanelHeader, PillAction } from "@/components/ui";
 import { useRouter } from "next/navigation";
 import { startTransition, useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import type { DueStatus } from "@/lib/due";
@@ -67,111 +68,100 @@ export function ServiceForm(props: { userId: string; today: string; currentKm: n
     });
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-5">
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <input type="hidden" name="clientToken" value={clientToken} />
-      <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Fecha
-          <input name="date" type="date" required defaultValue={today} max={today} className="field" />
-          {err.date && <span className="text-overdue">{err.date}</span>}
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Kilometraje
-          <KmInput initialValue={currentKm} />
-        </label>
-      </div>
-      {err.km && (
-        <p role="alert" className="-mt-3 text-sm text-overdue">
-          {err.km}
-        </p>
-      )}
+      <Panel as="section" aria-labelledby="visita" className="flex flex-col gap-4">
+        <PanelHeader id="visita" title="La visita" className="!pb-0" />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Fecha" error={err.date}>
+            <input name="date" type="date" required defaultValue={today} max={today} className="field h-12 !py-0" />
+          </Field>
+          <Field label="Kilometraje">
+            <KmInput initialValue={currentKm} />
+          </Field>
+        </div>
+        {err.km && <Alert>{err.km}</Alert>}
+        <Field label="Taller">
+          <input name="workshop" placeholder="Agencia Mazda, taller de confianza…" className="field" />
+        </Field>
+        <Field label="Costo total (MXN)" error={err.totalCostMxn}>
+          <input name="totalCostMxn" type="number" inputMode="decimal" min={0} step="0.01" placeholder="$" className="field figures" />
+        </Field>
+      </Panel>
 
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Taller
-        <input name="workshop" placeholder="Agencia Mazda, taller de confianza…" className="field" />
-      </label>
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Costo total (MXN)
-        <input name="totalCostMxn" type="number" inputMode="decimal" min={0} step="0.01" className="field figures" />
-        {err.totalCostMxn && <span className="text-overdue">{err.totalCostMxn}</span>}
-      </label>
+      <Panel as="section" className="!pb-2">
+        <fieldset className="flex flex-col">
+          <legend className="pb-1 text-[22px] font-light tracking-[-0.035em]">¿Qué se hizo?</legend>
+          <p className="mb-3 text-[12px] text-muted">Lo pendiente va primero. Agrega el costo de cada uno si lo tienes.</p>
+          {err.items && <div className="mb-3"><Alert>{err.items}</Alert></div>}
+          <ul className="flex flex-col">
+            {options.map((o) => (
+              <li key={o.id} className="flex min-h-14 items-center gap-3 border-t border-line py-2">
+                <label className="flex flex-1 cursor-pointer items-center gap-3">
+                  <input
+                    type="checkbox"
+                    name="item"
+                    value={o.id}
+                    checked={checked.has(o.id)}
+                    onChange={() => toggle(o.id)}
+                    className="peer sr-only"
+                  />
+                  <span aria-hidden className="flex size-6 shrink-0 items-center justify-center rounded-full border border-line bg-bg text-card transition-colors peer-checked:border-ink peer-checked:bg-ink peer-focus-visible:ring-2 peer-focus-visible:ring-accent/50">
+                    <svg viewBox="0 0 16 16" className="size-3 fill-none stroke-current stroke-2"><path d="m3.5 8.5 3 3 6-7" /></svg>
+                  </span>
+                  <span className="flex flex-1 flex-col gap-0.5 text-[14px] leading-snug">
+                    {o.name}
+                    {o.status !== "ok" && (
+                      <span className={`font-mono text-[10.5px] uppercase tracking-[0.08em] ${o.status === "vencido" ? "text-overdue" : "text-due-soon"}`}>
+                        {statusLabel[o.status]}
+                      </span>
+                    )}
+                  </span>
+                </label>
+                {checked.has(o.id) && (
+                  <input
+                    name={`cost-${o.id}`}
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    step="0.01"
+                    placeholder="$"
+                    aria-label={`Costo de ${o.name}`}
+                    className="field figures w-24 !rounded-full !py-1.5 text-right"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        </fieldset>
+      </Panel>
 
-      <fieldset className="flex flex-col gap-1">
-        <legend className="mb-2 text-sm text-muted">¿Qué se hizo?</legend>
-        {err.items && (
-          <p role="alert" className="mb-2 text-sm text-overdue">
-            {err.items}
-          </p>
-        )}
-        <ul className="divide-y divide-line rounded-xl border border-line bg-card">
-          {options.map((o) => (
-            <li key={o.id} className="flex items-center gap-3 px-3 py-2.5">
-              <label className="flex flex-1 items-center gap-3">
-                <input
-                  type="checkbox"
-                  name="item"
-                  value={o.id}
-                  checked={checked.has(o.id)}
-                  onChange={() => toggle(o.id)}
-                  className="size-5 accent-[var(--accent)]"
-                />
-                <span className="flex-1">
-                  {o.name}
-                  {o.status !== "ok" && (
-                    <span className={`ml-2 text-xs ${o.status === "vencido" ? "text-overdue" : "text-due-soon"}`}>
-                      {statusLabel[o.status]}
-                    </span>
-                  )}
-                </span>
-              </label>
-              {checked.has(o.id) && (
-                <input
-                  name={`cost-${o.id}`}
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="0.01"
-                  placeholder="$"
-                  aria-label={`Costo de ${o.name}`}
-                  className="field figures w-24 py-1.5"
-                />
-              )}
-            </li>
-          ))}
-        </ul>
-      </fieldset>
+      <Panel as="section" className="flex flex-col gap-4">
+        <Field label="Notas">
+          <textarea name="notes" rows={2} placeholder="Lo que te dijo el mecánico, piezas, garantías…" className="field" />
+        </Field>
+        <Field label="Factura o fotos · PDF, JPG, PNG o HEIC · máx. 10 MB">
+          <input
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,image/*,application/pdf"
+            onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+            className="file-pick"
+          />
+          {files.length > 0 && <span className="text-[12px] text-muted">{files.length === 1 ? "1 archivo" : `${files.length} archivos`}</span>}
+        </Field>
+      </Panel>
 
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Notas
-        <textarea name="notes" rows={2} className="field" />
-      </label>
-
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Factura o fotos (PDF, JPG, PNG o HEIC · máx. 10 MB)
-        <input
-          type="file"
-          multiple
-          accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,image/*,application/pdf"
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
-          className="text-sm text-ink file:mr-3 file:rounded-lg file:border file:border-line file:bg-card file:px-3 file:py-2 file:text-ink"
-        />
-        {files.length > 0 && <span>{files.length === 1 ? "1 archivo" : `${files.length} archivos`}</span>}
-      </label>
-
-      {err.form && (
-        <p role="alert" className="text-sm text-overdue">
-          {err.form}
-        </p>
-      )}
+      {err.form && <Alert>{err.form}</Alert>}
 
       {state.needsConfirm ? (
-        <button name="confirmJump" value="1" disabled={busy} className="btn-primary">
+        <PillAction name="confirmJump" value="1" disabled={busy}>
           Sí, el kilometraje es correcto
-        </button>
+        </PillAction>
       ) : (
-        <button disabled={busy} className="btn-primary">
+        <PillAction disabled={busy}>
           {uploading ? "Subiendo archivos…" : busy ? "Guardando…" : "Guardar servicio"}
-        </button>
+        </PillAction>
       )}
     </form>
   );

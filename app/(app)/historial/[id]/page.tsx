@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Chip, Label, PageHeader, Panel } from "@/components/ui";
 import { notFound } from "next/navigation";
 import { getService, getSignedUrls } from "@/lib/data/history";
 import { formatDate, formatKm, formatMxn } from "@/lib/format";
@@ -16,31 +16,37 @@ export default async function ServiceDetail({ params, searchParams }: PageProps<
   const urls = await getSignedUrls(service.attachments.map((a) => a.storage_path));
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link href="/historial" className="text-sm text-muted">
-        ← Historial
-      </Link>
-      <header className="flex flex-col gap-1">
-        <h1 className="figures text-2xl font-semibold">{formatDate(service.date)}</h1>
-        <p className="figures text-muted">
-          {formatKm(service.km)}
-          {service.workshop ? ` · ${service.workshop}` : ""}
-        </p>
-        {service.total_cost_mxn !== null && (
-          <p className="figures text-xl text-accent-ink">{formatMxn(service.total_cost_mxn)}</p>
-        )}
-      </header>
+    <div className="flex flex-col gap-4">
+      <PageHeader title={<span className="figures">{formatDate(service.date)}</span>} back={{ href: "/historial", label: "Historial" }}>
+        <div className="flex flex-wrap gap-1.5">
+          <Chip className="figures">{formatKm(service.km)}</Chip>
+          {service.workshop && <Chip>{service.workshop}</Chip>}
+        </div>
+      </PageHeader>
 
-      <ul className="divide-y divide-line">
-        {service.service_items.map((si) => (
-          <li key={si.id} className="flex justify-between gap-3 py-2.5">
-            <span>{si.maintenance_items?.name}</span>
-            {si.cost_mxn !== null && <span className="figures text-muted">{formatMxn(si.cost_mxn)}</span>}
-          </li>
-        ))}
-      </ul>
+      <Panel as="section" aria-labelledby="hecho" className="!pb-2">
+        <div className="flex items-end justify-between gap-4 pb-4">
+          <h2 id="hecho" className="text-[22px] font-light tracking-[-0.035em]">Lo que se hizo</h2>
+          {service.total_cost_mxn !== null && (
+            <p className="figures text-[26px] font-light leading-none tracking-[-0.03em] text-accent-ink">{formatMxn(service.total_cost_mxn)}</p>
+          )}
+        </div>
+        <ul className="flex flex-col">
+          {service.service_items.map((si) => (
+            <li key={si.id} className="flex min-h-13 items-baseline justify-between gap-3 border-t border-line py-3.5 text-[14px]">
+              <span>{si.maintenance_items?.name}</span>
+              {si.cost_mxn !== null && <span className="figures text-muted">{formatMxn(si.cost_mxn)}</span>}
+            </li>
+          ))}
+        </ul>
+      </Panel>
 
-      {service.notes && <p className="text-sm whitespace-pre-line">{service.notes}</p>}
+      {service.notes && (
+        <Panel as="section">
+          <Label as="h2" className="mb-2">Notas</Label>
+          <p className="text-[14px] leading-relaxed whitespace-pre-line">{service.notes}</p>
+        </Panel>
+      )}
 
       <AttachmentList
         serviceId={service.id}

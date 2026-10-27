@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { Alert, Field, PillAction } from "@/components/ui";
 import { saveItem } from "./actions";
 
 type Values = { id?: string; name: string; intervalKm: number | null; intervalMonths: number | null; notes: string | null };
@@ -12,44 +13,39 @@ export function ItemForm({ values, label }: { values?: Values; label: string }) 
   const open = openedAt !== null && (state.savedAt ?? 0) < openedAt;
 
   if (!open) {
-    return (
+    // The "add" entry is the page's primary action; per-row edits stay quiet.
+    return values ? (
       <button type="button" onClick={() => setOpenedAt(Date.now())} className="btn-quiet self-start">
         {label}
       </button>
+    ) : (
+      <PillAction type="button" onClick={() => setOpenedAt(Date.now())}>{label}</PillAction>
     );
   }
 
   return (
-    <form action={action} className="flex flex-col gap-3 rounded-xl border border-line bg-card p-4">
+    <form action={action} className={`flex w-full flex-col gap-4 ${values ? "mt-2 rounded-3xl bg-bg/60 p-4" : "panel p-5"}`}>
       {values?.id && <input type="hidden" name="id" value={values.id} />}
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Nombre
+      <Field label="Nombre">
         <input name="name" required defaultValue={values?.name} className="field" />
-      </label>
+      </Field>
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Cada (km)
+        <Field label="Cada (km)">
           <input name="intervalKm" type="number" inputMode="numeric" min={1} defaultValue={values?.intervalKm ?? ""} className="field figures" />
-        </label>
-        <label className="flex flex-col gap-1 text-sm text-muted">
-          Cada (meses)
+        </Field>
+        <Field label="Cada (meses)">
           <input name="intervalMonths" type="number" inputMode="numeric" min={1} defaultValue={values?.intervalMonths ?? ""} className="field figures" />
-        </label>
+        </Field>
       </div>
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        Notas
+      <Field label="Notas">
         <textarea name="notes" rows={2} defaultValue={values?.notes ?? ""} className="field" />
-      </label>
-      {state.error && (
-        <p role="alert" className="text-sm text-overdue">
-          {state.error}
-        </p>
-      )}
-      <div className="flex gap-2">
-        <button disabled={pending} className="btn-primary flex-1">
+      </Field>
+      {state.error && <Alert>{state.error}</Alert>}
+      <div className="flex items-center gap-2">
+        <PillAction disabled={pending} arrow={false} className="flex-1">
           {pending ? "Guardando…" : "Guardar"}
-        </button>
-        <button type="button" onClick={() => setOpenedAt(null)} className="btn-quiet">
+        </PillAction>
+        <button type="button" onClick={() => setOpenedAt(null)} className="btn-quiet h-13 px-5">
           Cancelar
         </button>
       </div>

@@ -3,6 +3,7 @@ import Loading from "../../loading";
 import { getDueSummary } from "@/lib/data/due";
 import { todayInMexico } from "@/lib/due";
 import { requireUser } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/ui";
 import { ServiceForm } from "./service-form";
 
 async function NuevoServicioContent() {
@@ -13,10 +14,10 @@ async function NuevoServicioContent() {
   const inactive = items.filter((i) => !i.active).length;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Registrar servicio</h1>
+    <div className="flex flex-col gap-5">
+      <PageHeader title="Registrar servicio" back={{ href: "/", label: "Inicio" }} caption="Con esto se recalcula cuándo toca lo siguiente." />
       <ServiceForm userId={user.id} today={todayInMexico()} currentKm={currentKm} options={options} />
-      {inactive > 0 && <p className="text-xs text-muted">{inactive} mantenimientos desactivados no aparecen aquí.</p>}
+      {inactive > 0 && <p className="px-1 text-[12px] text-muted">{inactive} mantenimientos desactivados no aparecen aquí.</p>}
     </div>
   );
 }

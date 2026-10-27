@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { uploadAttachments } from "@/lib/data/attachments";
 import { addAttachments } from "@/app/(app)/servicios/actions";
+import { Alert, Field, Panel, PanelHeader } from "@/components/ui";
 import { deleteAttachment } from "./actions";
 
 type Attachment = { id: string; fileName: string; url: string | null; isImage: boolean };
@@ -29,23 +30,21 @@ export function AttachmentList(props: { serviceId: string; userId: string; attac
     });
 
   return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">Comprobantes</h2>
+    <Panel as="section" aria-labelledby="comprobantes" className="flex flex-col gap-4">
+      <PanelHeader id="comprobantes" title="Comprobantes" className="!pb-0" />
       {failed && (
-        <p role="alert" className="rounded-xl border border-overdue/40 bg-card p-3 text-sm">
-          No se subió la factura. El servicio sí quedó guardado. Vuelve a adjuntarla abajo.
-        </p>
+        <Alert>No se subió la factura. El servicio sí quedó guardado. Vuelve a adjuntarla abajo.</Alert>
       )}
-      {attachments.length === 0 && !failed && <p className="text-sm text-muted">Sin comprobantes.</p>}
+      {attachments.length === 0 && !failed && <p className="text-[13px] text-muted">Aún no hay facturas ni fotos de esta visita.</p>}
       <ul className="flex flex-col gap-3">
         {attachments.map((a) => (
-          <li key={a.id} className="flex flex-col gap-2 rounded-xl border border-line bg-card p-3">
+          <li key={a.id} className="flex flex-col gap-3 rounded-3xl bg-bg/60 p-3">
             {a.isImage && a.url && (
               // eslint-disable-next-line @next/next/no-img-element -- short-lived signed URL, not optimizable
-              <img src={a.url} alt={a.fileName} className="max-h-80 w-full rounded-lg object-contain" />
+              <img src={a.url} alt={a.fileName} className="max-h-80 w-full rounded-2xl object-contain" />
             )}
             <div className="flex items-center justify-between gap-3 text-sm">
-              <span className="truncate">{a.fileName}</span>
+              <span className="truncate pl-1 font-mono text-[11px] text-muted">{a.fileName}</span>
               <span className="flex shrink-0 gap-2">
                 {a.url && (
                   <a href={a.url} target="_blank" rel="noreferrer" className="btn-quiet">
@@ -60,23 +59,20 @@ export function AttachmentList(props: { serviceId: string; userId: string; attac
           </li>
         ))}
       </ul>
-      <label className="flex flex-col gap-1 text-sm text-muted">
-        {failed ? "Reintentar adjunto" : "Agregar comprobante"}
+      <Field label={failed ? "Reintentar adjunto" : "Agregar comprobante"}>
         <input
           type="file"
           multiple
           disabled={pending}
           accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,image/*,application/pdf"
           onChange={(e) => onAdd(Array.from(e.target.files ?? []))}
-          className="text-sm text-ink file:mr-3 file:rounded-lg file:border file:border-line file:bg-card file:px-3 file:py-2 file:text-ink"
+          className="file-pick"
         />
-      </label>
-      {pending && <p className="text-sm text-muted">Un momento…</p>}
+      </Field>
+      {pending && <p className="text-[12px] text-muted">Un momento…</p>}
       {message && (
-        <p role="alert" className="text-sm text-overdue">
-          {message}
-        </p>
+        <Alert>{message}</Alert>
       )}
-    </section>
+    </Panel>
   );
 }
