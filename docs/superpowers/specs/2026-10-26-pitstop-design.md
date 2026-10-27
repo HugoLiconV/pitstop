@@ -48,7 +48,7 @@ Before writing Next.js code, consult `node_modules/next/dist/docs/` per `AGENTS.
 - `lib/validation/` — Zod schemas for every form.
 - `lib/supabase/` — server client factory (cookie-based session) and typed queries.
 - `app/` — routes: `/login`, `/` (Inicio), `/servicios/nuevo`, `/historial`, `/historial/[id]`, `/plan`.
-- `supabase/migrations/` — SQL migrations; `supabase/seed.sql` — vehicle + Mazda MX schedule.
+- `supabase/migrations/` — SQL migrations; `supabase/seed.sql` — vehicle + schedule from the owner's manual.
 
 ## 4. Data model
 
@@ -58,7 +58,7 @@ All tables have `id uuid pk`, `user_id uuid` (FK auth.users), `created_at`. RLS 
 |---|---|
 | `vehicles` | name, vin (nullable), plate (nullable), purchase_date, initial_km |
 | `odometer_readings` | vehicle_id, date, km (int), source (`manual` \| `service`) |
-| `maintenance_items` | vehicle_id, name, interval_km (nullable int), interval_months (nullable int), notes, active (bool), source (`mazda_mx` \| `custom`), verified (bool, default false for `mazda_mx`) |
+| `maintenance_items` | vehicle_id, name, interval_km (nullable int), interval_months (nullable int), notes, active (bool), source (`manual` \| `custom`) |
 | `services` | vehicle_id, date, km, workshop (nullable), total_cost_mxn (numeric, nullable), notes |
 | `service_items` | service_id, maintenance_item_id, cost_mxn (nullable) |
 | `attachments` | service_id, storage_path, file_name, mime_type, size_bytes |
@@ -86,7 +86,7 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 1. **Inicio** — current km + "Actualizar km" (single-field form); Vencido list, then Próximo list with remaining km/time; collapsed "Todo al día"; primary "+ Registrar servicio".
 2. **Registrar servicio** — date, km (prefilled current), taller, costo total; checklist of maintenance items (Vencido/Próximo first) with optional per-item cost; attach files (camera-friendly input). Save = one transaction creating service + service_items + odometer reading (source `service`); then upload files.
 3. **Historial** — services newest first (date, km, taller, total, items); filter by maintenance item; spend totals (this year, all-time). Detail page lists items and attachments (open via signed URL, delete).
-4. **Plan de mantenimiento** — items with intervals, last done, next due; edit intervals, deactivate, add custom items, mark Mazda-seeded items as verified ("verificar con póliza" badge until then).
+4. **Plan de mantenimiento** — items with intervals, last done, next due; edit intervals, deactivate, add custom items. Items from the manual show a "Manual Mazda" tag; edits are always allowed.
 5. **Login** — email/password. Sign-up disabled in Supabase; the single account is created once from the dashboard. All other routes require a session.
 
 ## 7. Attachments
@@ -97,25 +97,43 @@ Thresholds (1000 km, 30 days) are constants in one config module.
 - Viewed through short-lived signed URLs. HEIC may not preview in all browsers; it is offered as a download.
 - Free tier is 1 GB storage — acceptable for expected volume.
 
-## 8. Seed schedule (Mazda México — to verify against the póliza)
+## 8. Seed schedule (owner's manual)
 
-Mazda México's official plan: scheduled services every **10,000 km or 12 months**, whichever comes first, with a tolerance of ±1,000 km / ±1 month to keep the warranty valid. Mazda México also recommends an intermediate oil change every 5,000 km.
+Source: *Mazda 6 2015 Manual del propietario* (`context/6-2015-manual-del-propietario.pdf`), section 6 "Programa de mantenimiento", table **"Excepto Israel/Rusia/Bielorrusia/Azerbaiyán/Kazajistán"** (pp. 6-13 to 6-16). This is the international table that applies to Mexico. Rule: months or km, **whichever comes first**. Only SKYACTIV-G 2.5 rows apply.
 
-All seeded items get `source = mazda_mx`, `verified = false`. Exact per-component intervals for the MX 2015 2.5L were not found in public sources. Values marked † come from general Mazda Skyactiv-G schedules and must be checked against the booklet.
+Note: mazda.mx advertises scheduled services every 10,000 km / 12 months. The manual is stricter (10,000 km / **6 months**). We seed the manual's values; I can edit them in the app.
 
-| Item | interval_km | interval_months |
-|---|---|---|
-| Servicio programado Mazda (inspección general) | 10,000 | 12 |
-| Cambio de aceite y filtro (0W-20) | 5,000 | 6 |
-| Rotación de llantas † | 10,000 | 12 |
-| Filtro de aire de cabina † | 20,000 | 24 |
-| Filtro de aire de motor † | 40,000 | 48 |
-| Líquido de frenos † | 40,000 | 24 |
-| Inspección de frenos (balatas y discos) † | 10,000 | 12 |
-| Bujías † | 120,000 | — |
-| Refrigerante (FL22) † | 160,000 | 120 |
-| Aceite de transmisión automática (inspección) † | 40,000 | 48 |
-| Batería (revisión) † | — | 12 |
+All seeded items get `source = manual`.
+
+| Item | interval_km | interval_months | Manual |
+|---|---|---|---|
+| Cambio de aceite de motor y filtro | 10,000 | 6 | R every interval |
+| Rotación de neumáticos | 10,000 | — | "Rotar cada 10.000 km" |
+| Inspección de neumáticos y presión | 10,000 | 6 | I |
+| Inspección de frenos de disco y freno de mano | 10,000 | 6 | I |
+| Inspección de correas de mando | 10,000 | 6 | I |
+| Filtro de aire de cabina | 20,000 | 12 | R |
+| Inspección de batería | 20,000 | 12 | I |
+| Inspección de sistema de enfriamiento | 20,000 | 12 | I |
+| Inspección de líneas de freno y mangueras | 20,000 | 12 | I |
+| Inspección de dirección y suspensión | 20,000 | 12 | I |
+| Inspección de líneas de combustible | 20,000 | 12 | I |
+| Pernos y tuercas de chasis y carrocería (apretar) | 20,000 | 12 | T |
+| Filtro de aire de motor (cambio) | 60,000 | 36 | C C R pattern; cleaned in between |
+| Líquido de frenos | 40,000 | 24 | R every 4th interval |
+| Sistema evaporativo (inspección) | 40,000 | 24 | I |
+| Inspección de fundas de ejes | 40,000 | 24 | I |
+| Filtro de combustible | 60,000 | — | "Cambie cada 60.000 km" |
+| Cubierta térmica del escape (inspección) | 80,000 | — | "Inspeccione cada 80.000 km" |
+| Bujías de encendido | 120,000 | — | "Cambie cada 120.000 km" |
+| Refrigerante de motor (FL-22) | 200,000 | 120 | First change 200,000 km / 10 years, then 100,000 km / 5 years |
+| Condición de carrocería (óxido/corrosión) | — | 12 | "Inspeccione anualmente" |
+
+Notes:
+- **Coolant:** v1 models one interval per item. Seed the first-change interval. After the first change, I edit it to 100,000 km / 60 months (stated in the item's `notes`).
+- **Severe conditions** (heat, dust, mountains, short trips, idling) call for more frequent oil, belts and brake fluid (fluid yearly). These are noted on the items, not modeled.
+- **Automatic transmission fluid** has no scheduled change in the manual and is not seeded. I can add it as a custom item.
+- The manual's inspection items are grouped above to keep the list short. They can be split or removed in the app.
 
 ## 9. Error handling
 
