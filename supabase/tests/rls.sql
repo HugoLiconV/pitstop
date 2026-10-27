@@ -9,14 +9,15 @@ insert into auth.users (id, aud, role, email) values
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}';
 
-select isnt(
-  record_service(
+select set_config('test.service', record_service(
     (select id from vehicles limit 1), '2026-10-01', 70000, 'Taller', 1850, null,
     jsonb_build_array(jsonb_build_object('maintenance_item_id',
-      (select id from maintenance_items where name like 'Cambio de aceite%'), 'cost_mxn', 900)), gen_random_uuid()),
-  null, 'owner can record a service');
-select is((select count(*)::int from service_items), 1, 'service items saved with the service');
-select is((select count(*)::int from odometer_readings where source = 'service'), 1, 'odometer reading saved with the service');
+      (select id from maintenance_items where name like 'Cambio de aceite%'), 'cost_mxn', 900)), gen_random_uuid())::text, true);
+select isnt(current_setting('test.service'), '', 'owner can record a service');
+select is((select count(*)::int from service_items where service_id = current_setting('test.service')::uuid), 1,
+  'service items saved with the service');
+select is((select count(*)::int from odometer_readings where source = 'service' and date = '2026-10-01' and km = 70000), 1,
+  'odometer reading saved with the service');
 
 -- The same client token twice (double tap, network retry) yields one service.
 select is(
