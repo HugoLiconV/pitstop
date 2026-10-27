@@ -58,7 +58,7 @@ All tables have `id uuid pk`, `user_id uuid` (FK auth.users), `created_at`. RLS 
 |---|---|
 | `vehicles` | name, vin (nullable), plate (nullable), purchase_date, initial_km |
 | `odometer_readings` | vehicle_id, date, km (int), source (`manual` \| `service`) |
-| `maintenance_items` | vehicle_id, name, interval_km (nullable int), interval_months (nullable int), notes, active (bool), source (`manual` \| `custom`) |
+| `maintenance_items` | vehicle_id, name, interval_km (nullable int), interval_months (nullable int), notes, active (bool), source (`manual` \| `custom`), manual_page (nullable text, e.g. `6-13`) |
 | `services` | vehicle_id, date, km, workshop (nullable), total_cost_mxn (numeric, nullable), notes |
 | `service_items` | service_id, maintenance_item_id, cost_mxn (nullable) |
 | `attachments` | service_id, storage_path, file_name, mime_type, size_bytes |
@@ -157,7 +157,8 @@ Notes:
 ## 10. Error handling
 
 - All Server Actions validate input with Zod; field-level Spanish error messages.
-- Odometer: reject a reading lower than the latest; require explicit confirmation for a jump of more than 5,000 km.
+- Odometer: a reading is checked against neighboring readings *by date*. It must not be below the latest earlier reading or above the earliest later one, so back-entering old services works. A jump of more than 5,000 km over the previous reading requires explicit confirmation.
+- "Today" is computed in `America/Mexico_City`, not server UTC.
 - Service save is a single Postgres function call (RPC) so service + items + odometer reading commit together. Attachment upload happens after; on failure the service persists and the detail page shows "reintentar adjunto".
 - Unexpected errors → `error.tsx` page in Spanish. Missing/expired session → redirect to `/login`.
 
