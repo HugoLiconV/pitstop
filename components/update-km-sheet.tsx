@@ -4,13 +4,12 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { updateKm } from "@/app/(app)/odometro/actions";
 
 export function UpdateKmSheet({ currentKm }: { currentKm: number }) {
-  const [open, setOpen] = useState(false);
   const [state, action, pending] = useActionState(updateKm, {});
+  // The sheet is open while no save has happened since it was opened.
+  const [openedAt, setOpenedAt] = useState<number | null>(null);
+  const open = openedAt !== null && (state.savedAt ?? 0) < openedAt;
+  const setOpen = (value: boolean) => setOpenedAt(value ? Date.now() : null);
   const input = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (state.savedAt) setOpen(false);
-  }, [state.savedAt]);
 
   useEffect(() => {
     if (open) input.current?.focus();
