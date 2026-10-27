@@ -11,9 +11,9 @@ const tabs = [
 
 export function BottomNav() {
   const pathname = usePathname();
-  return <nav aria-label="Principal" className="fixed inset-x-0 bottom-0 z-20 bg-gradient-to-t from-bg via-bg/85 to-transparent px-5 pt-8 pb-[calc(env(safe-area-inset-bottom)+14px)]">
-    <ul className="mx-auto grid max-w-[340px] grid-cols-3 gap-1 rounded-full bg-[#d6d3cc]/80 p-1.5 shadow-[0_18px_36px_-14px_rgb(50_40_30/0.5),0_0_0_1px_rgb(255_255_255/0.5)_inset] backdrop-blur-xl">
-      {tabs.map(tab => { const active = tab.match(pathname); return <li key={tab.href}><Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-11 items-center justify-center gap-2 rounded-full text-[12px] transition-colors focus-visible:outline-2 focus-visible:outline-accent ${active ? "bg-ink font-medium text-card" : "text-muted hover:text-ink"}`}><svg aria-hidden viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d={tab.icon} /></svg>{tab.label}</Link></li>; })}
+  return <nav aria-label="Principal" className="pointer-events-none fixed inset-x-0 bottom-0 z-20 px-5 pb-[calc(env(safe-area-inset-bottom)+14px)]">
+    <ul className="mx-auto grid max-w-[340px] grid-cols-3 gap-1 glass backdrop-blur-[14px] backdrop-saturate-[1.8] backdrop-brightness-105 pointer-events-auto rounded-full p-1.5">
+      {tabs.map(tab => { const active = tab.match(pathname); return <li key={tab.href}><Link href={tab.href} aria-current={active ? "page" : undefined} className={`flex min-h-11 items-center justify-center gap-2 rounded-full text-[12px] transition-colors focus-visible:outline-2 focus-visible:outline-accent ${active ? "bg-white/55 font-medium text-ink shadow-[inset_0_1px_0_rgb(255_255_255/0.9),0_2px_8px_-3px_rgb(50_40_30/0.25)]" : "text-muted hover:text-ink"}`}><svg aria-hidden viewBox="0 0 24 24" className="size-4 fill-none stroke-current stroke-[1.5]"><path d={tab.icon} /></svg>{tab.label}</Link></li>; })}
     </ul>
   </nav>;
 }
