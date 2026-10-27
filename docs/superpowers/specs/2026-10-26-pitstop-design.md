@@ -134,13 +134,13 @@ All seeded items get `source = manual`.
 | Filtro de aire de cabina | 20,000 | 12 | R |
 | Inspección de batería | 20,000 | 12 | I |
 | Inspección de sistema de enfriamiento | 20,000 | 12 | I |
-| Inspección de líneas de freno y mangueras | 20,000 | 12 | I |
+| Inspección de líneas de freno, mangueras y reforzador | 20,000 | 12 | I |
 | Inspección de dirección y suspensión | 20,000 | 12 | I |
 | Inspección de líneas de combustible | 20,000 | 12 | I |
 | Pernos y tuercas de chasis y carrocería (apretar) | 20,000 | 12 | T |
 | Filtro de aire de motor (cambio) | 60,000 | 36 | C C R pattern; cleaned in between |
 | Líquido de frenos | 40,000 | 24 | R every 4th interval |
-| Sistema evaporativo (inspección) | 40,000 | 24 | I |
+| Sistema evaporativo (inspección) | 20,000 | 12 | I |
 | Inspección de fundas de ejes | 40,000 | 24 | I |
 | Filtro de combustible | 60,000 | — | "Cambie cada 60.000 km" |
 | Cubierta térmica del escape (inspección) | 80,000 | — | "Inspeccione cada 80.000 km" |
@@ -151,6 +151,8 @@ All seeded items get `source = manual`.
 Notes:
 - **Coolant:** v1 models one interval per item. Seed the first-change interval. After the first change, I edit it to 100,000 km / 60 months (stated in the item's `notes`).
 - **Severe conditions** (heat, dust, mountains, short trips, idling) call for more frequent oil, belts and brake fluid (fluid yearly). These are noted on the items, not modeled.
+- **Specs in notes:** oil (0W-20 / 5W-30, 4.5 L with filter, dashboard reset), tire pressure (33 psi cold), brake fluid (DOT-3/4, level check every 10,000 km).
+- **Not applicable:** manual transmission, rear differential and transfer oil (car is automatic, FWD); tire repair kit (car has a spare).
 - **Automatic transmission fluid** has no scheduled change in the manual and is not seeded. I can add it as a custom item.
 - The manual's inspection items are grouped above to keep the list short. They can be split or removed in the app.
 
