@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --bg: #f5f1ea;
   --card: #fbf8f3;
   --ink: #2a241d;
@@ -11,20 +12,6 @@
   --due-soon: var(--accent-ink);
   --overdue: #a3402e;
   --ok: #5f7a5a;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1f1b17;
-    --card: #2a2520;
-    --ink: #efe8dd;
-    --muted: #a89d8f;
-    --line: #3a332c;
-    --accent: #d98a3a;
-    --accent-ink: #e9a35c;
-    --overdue: #e07a66;
-    --ok: #9cb895;
-  }
 }
 
 @theme inline {
