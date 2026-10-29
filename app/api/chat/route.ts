@@ -11,7 +11,7 @@ import {
 import { z } from "zod";
 import { trimHistory } from "@/lib/assistant/chat";
 import { isModelId } from "@/lib/assistant/models";
-import { SYSTEM_PROMPT } from "@/lib/assistant/prompt";
+import { buildInstructions } from "@/lib/assistant/prompt";
 import { getCarContext } from "@/lib/data/assistant";
 import { getChat, loadMessages, saveExchange } from "@/lib/data/chats";
 import { createClient } from "@/lib/supabase/server";
@@ -58,7 +58,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: openai(model),
-    system: `${SYSTEM_PROMPT}\n\n${carContext}`,
+    system: buildInstructions(carContext),
     messages: await convertToModelMessages(trimHistory(messages)),
     tools,
     // Reasoning models spend part of this budget thinking; too low a cap returns an empty answer.

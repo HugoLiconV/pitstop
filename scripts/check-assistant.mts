@@ -5,7 +5,7 @@ import { openai } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { buildCarContext } from "@/lib/assistant/context";
 import { MODELS } from "@/lib/assistant/models";
-import { SYSTEM_PROMPT } from "@/lib/assistant/prompt";
+import { buildInstructions } from "@/lib/assistant/prompt";
 import { computeDue } from "@/lib/due/compute";
 import { todayInMexico } from "@/lib/due/dates";
 
@@ -68,7 +68,7 @@ for (const model of MODELS) {
   for (const question of QUESTIONS) {
     const { text, sources, toolCalls } = await generateText({
       model: openai(model),
-      system: `${SYSTEM_PROMPT}\n\n${context}`,
+      system: buildInstructions(context),
       prompt: question,
       tools,
       maxOutputTokens: 4000,

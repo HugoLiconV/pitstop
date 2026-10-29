@@ -103,7 +103,7 @@ describe("POST /api/chat", () => {
     expect(Object.keys(args.tools).sort()).toEqual(["file_search", "web_search"]);
     expect(args.messages).toHaveLength(30);
     expect(args.messages.at(-1).id).toBe("m1");
-    expect(args.system).toContain("# Vehículo");
+    expect(args.system).toContain("<contexto_del_coche>\n# Vehículo");
   });
 
   it("saves the exchange only when the answer completes", async () => {
