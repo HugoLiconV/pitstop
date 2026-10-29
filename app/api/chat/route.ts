@@ -61,7 +61,8 @@ export async function POST(req: Request) {
     system: `${SYSTEM_PROMPT}\n\n${carContext}`,
     messages: await convertToModelMessages(trimHistory(messages)),
     tools,
-    maxOutputTokens: 1500,
+    // Reasoning models spend part of this budget thinking; too low a cap returns an empty answer.
+    maxOutputTokens: 4000,
   });
   // Finish (and save) the answer even if the phone closes the connection.
   result.consumeStream();

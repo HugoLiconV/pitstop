@@ -84,7 +84,7 @@ describe("POST /api/chat", () => {
     expect(res.status).toBe(200);
     const args = mocks.streamText.mock.calls[0][0];
     expect(args.model).toEqual({ modelId: "gpt-6-luna" });
-    expect(args.maxOutputTokens).toBe(1500);
+    expect(args.maxOutputTokens).toBe(4000); // includes reasoning tokens
     expect(Object.keys(args.tools).sort()).toEqual(["file_search", "web_search"]);
     expect(args.messages).toHaveLength(30);
     expect(args.messages.at(-1).id).toBe("m1");
