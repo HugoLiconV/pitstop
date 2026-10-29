@@ -88,3 +88,14 @@ body {
     inset 0 0 0 1px rgb(255 255 255 / 0.35),
     0 16px 34px -14px rgb(50 40 30 / 0.4);
 }
+
+/* Assistant answers rendered from Markdown. */
+.answer { display: flex; flex-direction: column; gap: 0.7em; }
+.answer :where(h1, h2, h3, h4) { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin-top: 0.4em; }
+.answer :where(ul, ol) { display: flex; flex-direction: column; gap: 0.35em; padding-left: 1.2em; }
+.answer ul { list-style: disc; }
+.answer ol { list-style: decimal; }
+.answer li::marker { color: var(--color-muted); }
+.answer strong { font-weight: 600; }
+.answer a { text-decoration: underline; text-decoration-color: var(--color-line); text-underline-offset: 3px; }
+.answer a:hover { text-decoration-color: currentColor; }

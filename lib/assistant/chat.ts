@@ -15,3 +15,8 @@ export function titleFrom(text: string): string {
   const title = words.slice(0, TITLE_WORDS).join(" ");
   return words.length > TITLE_WORDS ? `${title}…` : title;
 }
+
+// OpenAI marks citations inline with private-use characters (…); sources are shown as chips instead.
+export function stripCitationMarkers(text: string): string {
+  return text.replace(/ ?[^]*/g, "").trim();
+}
