@@ -23,12 +23,12 @@ const bodySchema = z.object({
   message: z.object({
     id: z.string().min(1),
     role: z.literal("user"),
-    parts: z.array(z.looseObject({ type: z.string() })),
+    // Questions are text only, with caps so one pasted wall of text can't run up the bill.
+    parts: z.array(z.object({ type: z.literal("text"), text: z.string().max(4000) })).min(1).max(10),
   }),
 });
 
-const hasText = (message: z.infer<typeof bodySchema>["message"]) =>
-  message.parts.some((p) => p.type === "text" && typeof p.text === "string" && p.text.trim() !== "");
+const hasText = (message: z.infer<typeof bodySchema>["message"]) => message.parts.some((p) => p.text.trim() !== "");
 
 const tools = {
   file_search: openai.tools.fileSearch({ vectorStoreIds: [process.env.OPENAI_VECTOR_STORE_ID!], maxNumResults: 5 }),

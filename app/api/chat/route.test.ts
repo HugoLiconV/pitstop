@@ -71,6 +71,21 @@ describe("POST /api/chat", () => {
     expect(mocks.streamText).not.toHaveBeenCalled();
   });
 
+  it("rejects an oversized message without calling the model", async () => {
+    const res = await POST(request({ id: CHAT_ID, message: text("m1", "user", "a".repeat(4001)) }));
+    expect(res.status).toBe(400);
+    const many = { id: "m1", role: "user", parts: Array.from({ length: 11 }, () => ({ type: "text", text: "hola" })) };
+    expect((await POST(request({ id: CHAT_ID, message: many }))).status).toBe(400);
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
+  it("accepts only text parts from the user", async () => {
+    const file = { id: "m1", role: "user", parts: [{ type: "text", text: "mira" }, { type: "file", url: "https://x.test/a.pdf", mediaType: "application/pdf" }] };
+    const res = await POST(request({ id: CHAT_ID, message: file }));
+    expect(res.status).toBe(400);
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
   it("rejects a chat whose model is not allowed", async () => {
     mocks.getChat.mockResolvedValue({ id: CHAT_ID, title: "x", model: "gpt-4o", updated_at: "" });
     const res = await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }));

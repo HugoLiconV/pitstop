@@ -86,6 +86,10 @@ Both in `.env.local`, `.env.example` (empty) and Vercel. A monthly budget limit 
    - `maxOutputTokens: 1500`.
 5. **Respond.** `toUIMessageStreamResponse` with `sendSources: true`, server-generated assistant ids (`createIdGenerator`), and `consumeStream()` so the answer finishes even if the client disconnects. On end: insert the user and assistant messages (`metadata.model`), set `updated_at`, set the title on the first exchange.
 
+Stop: the stop button only stops the display. The server keeps generating (`consumeStream`) and saves the full answer, the same as when the phone drops the connection, so a reload shows the complete answer and the question stays in history.
+
+Limits: a question is text only, at most 10 parts of 4,000 characters each; anything else is a 400.
+
 Errors: OpenAI failures (timeout, quota, unknown model) return an error part. Nothing is saved for the failed answer; the client shows a retry.
 
 ## UI

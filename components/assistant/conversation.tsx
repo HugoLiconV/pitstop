@@ -114,7 +114,7 @@ export function Conversation({ chat, initialMessages, initialQuestion }: { chat:
 
     <form onSubmit={send} className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+76px)] z-20 px-5">
       <div className="glass mx-auto flex max-w-[400px] items-end gap-2 rounded-[26px] p-1.5 backdrop-blur-[14px] backdrop-saturate-[1.8]">
-        <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} placeholder="Escribe tu pregunta…" aria-label="Tu pregunta"
+        <textarea value={input} onChange={(e) => setInput(e.target.value)} rows={1} maxLength={4000} placeholder="Escribe tu pregunta…" aria-label="Tu pregunta"
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && window.matchMedia("(hover: hover)").matches) send(e); }}
           className="field-sizing-content max-h-36 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-3 py-2.5 text-base leading-snug text-ink outline-none placeholder:text-muted" />
         {busy ? (
