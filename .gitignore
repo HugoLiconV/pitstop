@@ -44,3 +44,4 @@ context/*.pdf
 
 # design references (third-party shots, kept local)
 /inspiration
+context/manual.md
