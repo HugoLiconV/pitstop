@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import Loading from "../../loading";
 import { Conversation } from "@/components/assistant/conversation";
 import { DEFAULT_MODEL, isModelId } from "@/lib/assistant/models";
+import { DEFAULT_REASONING, DEFAULT_TOKEN_LIMIT, isReasoningEffort, isTokenLimit } from "@/lib/assistant/settings";
 import { getChat, loadMessages } from "@/lib/data/chats";
 
 async function ConversationContent({ params, searchParams }: PageProps<"/asistente/[id]">) {
@@ -11,7 +12,13 @@ async function ConversationContent({ params, searchParams }: PageProps<"/asisten
   if (!chat) notFound();
   const messages = await loadMessages(chat.id);
   return <Conversation
-    chat={{ id: chat.id, title: chat.title, model: isModelId(chat.model) ? chat.model : DEFAULT_MODEL }}
+    chat={{
+      id: chat.id,
+      title: chat.title,
+      model: isModelId(chat.model) ? chat.model : DEFAULT_MODEL,
+      reasoning: isReasoningEffort(chat.reasoning_effort) ? chat.reasoning_effort : DEFAULT_REASONING,
+      tokens: isTokenLimit(chat.max_output_tokens) ? chat.max_output_tokens : DEFAULT_TOKEN_LIMIT,
+    }}
     initialMessages={messages}
     initialQuestion={messages.length === 0 && typeof q === "string" ? q : undefined}
   />;

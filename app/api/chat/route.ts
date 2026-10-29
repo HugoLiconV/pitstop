@@ -12,6 +12,7 @@ import { z } from "zod";
 import { trimHistory } from "@/lib/assistant/chat";
 import { isModelId } from "@/lib/assistant/models";
 import { buildInstructions } from "@/lib/assistant/prompt";
+import { isReasoningEffort, isTokenLimit } from "@/lib/assistant/settings";
 import { getCarContext } from "@/lib/data/assistant";
 import { getChat, loadMessages, saveExchange } from "@/lib/data/chats";
 import { createClient } from "@/lib/supabase/server";
@@ -50,8 +51,11 @@ export async function POST(req: Request) {
   const chat = await getChat(id);
   if (!chat) return new Response("Conversación no encontrada", { status: 404 });
   if (!hasText(message)) return new Response("Mensaje vacío", { status: 400 });
-  const model = chat.model;
+  const { model, reasoning_effort: reasoningEffort, max_output_tokens: maxOutputTokens } = chat;
   if (!isModelId(model)) return new Response("Modelo no permitido", { status: 400 });
+  if (!isReasoningEffort(reasoningEffort) || !isTokenLimit(maxOutputTokens)) return new Response("Ajustes no permitidos", { status: 400 });
+
+  const settings = { model, reasoningEffort, maxOutputTokens };
 
   const [previous, carContext] = await Promise.all([loadMessages(id), getCarContext()]);
   const messages = await validateUIMessages({ messages: [...previous, message as UIMessage], tools });
@@ -61,8 +65,9 @@ export async function POST(req: Request) {
     system: buildInstructions(carContext),
     messages: await convertToModelMessages(trimHistory(messages)),
     tools,
-    // Reasoning models spend part of this budget thinking; too low a cap returns an empty answer.
-    maxOutputTokens: 4000,
+    // The cap includes reasoning tokens; both come from the chat's settings.
+    maxOutputTokens,
+    providerOptions: { openai: { reasoningEffort } },
   });
   // Finish (and save) the answer even if the phone closes the connection.
   result.consumeStream();
@@ -73,10 +78,16 @@ export async function POST(req: Request) {
       originalMessages: messages,
       generateMessageId: createIdGenerator({ prefix: "msg", size: 16 }),
       sendSources: true,
+      // The answer carries how it was produced, so the screen can show it and a cut-off answer can be explained.
+      messageMetadata: ({ part }) => {
+        if (part.type === "start") return settings;
+        if (part.type === "finish") return { ...settings, finishReason: part.finishReason, outputTokens: part.totalUsage.outputTokens };
+        return undefined;
+      },
       onError: () => "No pude responder. Intenta de nuevo.",
       onEnd: async ({ isAborted, outcome, responseMessage }) => {
         if (isAborted || outcome.status === "failed") return;
-        await saveExchange(id, [message as UIMessage, responseMessage], model);
+        await saveExchange(id, [message as UIMessage, responseMessage]);
       },
     }),
   });

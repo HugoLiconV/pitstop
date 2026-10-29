@@ -65,14 +65,14 @@ isOneToOne: false
                   ]
                 },"chats": {
                   Row: {
-                    "created_at": string,"id": string,"model": string,"title": string,"updated_at": string,"user_id": string
+                    "created_at": string,"id": string,"max_output_tokens": number,"model": string,"reasoning_effort": string,"title": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"model"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"max_output_tokens"?: number,"model"?: string,"reasoning_effort"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"model"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"max_output_tokens"?: number,"model"?: string,"reasoning_effort"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     

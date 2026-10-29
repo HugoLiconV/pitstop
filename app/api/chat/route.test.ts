@@ -40,6 +40,7 @@ process.env.OPENAI_VECTOR_STORE_ID = "vs_test";
 const { POST } = await import("./route");
 
 const CHAT_ID = "6f1c2b4e-8d2a-4b8e-9a3f-1c2d3e4f5a6b";
+const chatRow = (over: Record<string, unknown> = {}) => ({ id: CHAT_ID, title: "Nueva conversación", model: "gpt-6-luna", reasoning_effort: "low", max_output_tokens: 4000, updated_at: "", ...over });
 const text = (id: string, role: "user" | "assistant", t: string) => ({ id, role, parts: [{ type: "text", text: t }] });
 const request = (body: unknown) => new Request("http://localhost/api/chat", { method: "POST", body: JSON.stringify(body) });
 
@@ -47,7 +48,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.uiStreamOptions = undefined;
   mocks.getUser.mockResolvedValue({ data: { user: { id: "u1" } } });
-  mocks.getChat.mockResolvedValue({ id: CHAT_ID, title: "Nueva conversación", model: "gpt-6-luna", updated_at: "" });
+  mocks.getChat.mockResolvedValue(chatRow());
   mocks.loadMessages.mockResolvedValue([]);
   mocks.streamText.mockReturnValue({ stream: new ReadableStream(), consumeStream: vi.fn() });
 });
@@ -86,8 +87,34 @@ describe("POST /api/chat", () => {
     expect(mocks.streamText).not.toHaveBeenCalled();
   });
 
+  it("uses the chat's reasoning effort and output cap", async () => {
+    mocks.getChat.mockResolvedValue(chatRow({ reasoning_effort: "high", max_output_tokens: 16000 }));
+    await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }));
+    const args = mocks.streamText.mock.calls[0][0];
+    expect(args.maxOutputTokens).toBe(16000);
+    expect(args.providerOptions).toEqual({ openai: { reasoningEffort: "high" } });
+  });
+
+  it("tags the answer with its settings, finish reason and token use", async () => {
+    await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }));
+    const meta = mocks.uiStreamOptions!.messageMetadata as (o: unknown) => unknown;
+    const settings = { model: "gpt-6-luna", reasoningEffort: "low", maxOutputTokens: 4000 };
+    expect(meta({ part: { type: "start" } })).toEqual(settings);
+    expect(meta({ part: { type: "finish", finishReason: "length", totalUsage: { outputTokens: 4000 } } }))
+      .toEqual({ ...settings, finishReason: "length", outputTokens: 4000 });
+    expect(meta({ part: { type: "text-delta" } })).toBeUndefined();
+  });
+
+  it("rejects settings outside the allowed lists", async () => {
+    mocks.getChat.mockResolvedValue(chatRow({ reasoning_effort: "max" }));
+    expect((await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }))).status).toBe(400);
+    mocks.getChat.mockResolvedValue(chatRow({ max_output_tokens: 2000 }));
+    expect((await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }))).status).toBe(400);
+    expect(mocks.streamText).not.toHaveBeenCalled();
+  });
+
   it("rejects a chat whose model is not allowed", async () => {
-    mocks.getChat.mockResolvedValue({ id: CHAT_ID, title: "x", model: "gpt-4o", updated_at: "" });
+    mocks.getChat.mockResolvedValue(chatRow({ model: "gpt-4o" }));
     const res = await POST(request({ id: CHAT_ID, message: text("m1", "user", "hola") }));
     expect(res.status).toBe(400);
     expect(mocks.streamText).not.toHaveBeenCalled();
@@ -100,6 +127,7 @@ describe("POST /api/chat", () => {
     const args = mocks.streamText.mock.calls[0][0];
     expect(args.model).toEqual({ modelId: "gpt-6-luna" });
     expect(args.maxOutputTokens).toBe(4000); // includes reasoning tokens
+    expect(args.providerOptions).toEqual({ openai: { reasoningEffort: "low" } });
     expect(Object.keys(args.tools).sort()).toEqual(["file_search", "web_search"]);
     expect(args.messages).toHaveLength(30);
     expect(args.messages.at(-1).id).toBe("m1");
@@ -118,6 +146,6 @@ describe("POST /api/chat", () => {
 
     await onEnd({ isAborted: false, outcome: { status: "completed" }, responseMessage: reply, messages: [] });
     expect(mocks.saveExchange).toHaveBeenCalledOnce();
-    expect(mocks.saveExchange).toHaveBeenCalledWith(CHAT_ID, [message, reply], "gpt-6-luna");
+    expect(mocks.saveExchange).toHaveBeenCalledWith(CHAT_ID, [message, reply]);
   });
 });

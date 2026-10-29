@@ -4,14 +4,16 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import Link from "next/link";
 import { useEffect, useRef, useState, useTransition } from "react";
-import { changeModel, rename } from "@/app/(app)/asistente/actions";
+import { changeModel, changeSettings, rename } from "@/app/(app)/asistente/actions";
 import { Alert, ArrowIcon } from "@/components/ui";
 import { DEFAULT_TITLE, titleFrom } from "@/lib/assistant/chat";
 import type { ModelId } from "@/lib/assistant/models";
+import { REASONING_LABELS, type ReasoningEffort, type TokenLimit } from "@/lib/assistant/settings";
 import { Message } from "./message";
 import { ModelSwitch } from "./model-switch";
+import { SettingsSheet } from "./settings-sheet";
 
-type Chat = { id: string; title: string; model: ModelId };
+type Chat = { id: string; title: string; model: ModelId; reasoning: ReasoningEffort; tokens: TokenLimit };
 
 // What the assistant is doing right now, read from the tool parts of the answer being streamed.
 function activity(messages: UIMessage[]): string {
@@ -25,6 +27,9 @@ function activity(messages: UIMessage[]): string {
 
 export function Conversation({ chat, initialMessages, initialQuestion }: { chat: Chat; initialMessages: UIMessage[]; initialQuestion?: string }) {
   const [model, setModel] = useState(chat.model);
+  const [reasoning, setReasoning] = useState(chat.reasoning);
+  const [tokens, setTokens] = useState(chat.tokens);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [title, setTitle] = useState(chat.title);
   const [editing, setEditing] = useState(false);
   const [input, setInput] = useState("");
@@ -74,6 +79,16 @@ export function Conversation({ chat, initialMessages, initialQuestion }: { chat:
     start(() => rename(chat.id, next));
   };
 
+  const pickReasoning = (next: ReasoningEffort) => {
+    setReasoning(next);
+    start(() => changeSettings(chat.id, { reasoning_effort: next }));
+  };
+
+  const pickTokens = (next: TokenLimit) => {
+    setTokens(next);
+    start(() => changeSettings(chat.id, { max_output_tokens: next }));
+  };
+
   const pickModel = (next: ModelId) => {
     setModel(next);
     start(() => changeModel(chat.id, next));
@@ -92,6 +107,10 @@ export function Conversation({ chat, initialMessages, initialQuestion }: { chat:
         <button type="button" onClick={() => { setTitle(shownTitle); setEditing(true); }} title="Renombrar" className="min-h-11 min-w-0 flex-1 truncate rounded-xl px-1 text-left text-[15px] font-medium text-ink focus-visible:outline-2 focus-visible:outline-accent">{shownTitle}</button>
       )}
       <ModelSwitch value={model} onChange={pickModel} disabled={busy} />
+      <button type="button" onClick={() => setSettingsOpen(true)} disabled={busy} aria-label={`Ajustes: razonamiento ${REASONING_LABELS[reasoning].toLowerCase()}`}
+        className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-card text-ink shadow-[0_4px_14px_-8px_rgb(60_50_40/0.5)] focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60">
+        <svg aria-hidden viewBox="0 0 24 24" className="size-[18px] fill-none stroke-current stroke-[1.5]"><path d="M4 7h10M18 7h2M4 17h4M12 17h8" /><circle cx="16" cy="7" r="2" /><circle cx="10" cy="17" r="2" /></svg>
+      </button>
     </header>
 
     {messages.length === 0 && !busy && (
@@ -110,7 +129,10 @@ export function Conversation({ chat, initialMessages, initialQuestion }: { chat:
         <button type="button" onClick={() => regenerate()} className="btn-quiet min-h-11 shrink-0">Reintentar</button>
       </div>
     )}
-    <div ref={endRef} />
+    {/* Scroll margin keeps the last line above the fixed composer and tab bar. */}
+    <div ref={endRef} className="scroll-mb-44" />
+
+    <SettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} reasoning={reasoning} tokens={tokens} onReasoning={pickReasoning} onTokens={pickTokens} />
 
     <form onSubmit={send} className="fixed inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+76px)] z-20 px-5">
       <div className="glass mx-auto flex max-w-[400px] items-end gap-2 rounded-[26px] p-1.5 backdrop-blur-[14px] backdrop-saturate-[1.8]">

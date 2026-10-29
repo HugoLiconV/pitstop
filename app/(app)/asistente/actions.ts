@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { MODELS } from "@/lib/assistant/models";
-import { createChat, deleteChat, renameChat, setChatModel } from "@/lib/data/chats";
+import { isReasoningEffort, TOKEN_LIMITS, type ReasoningEffort } from "@/lib/assistant/settings";
+import { createChat, deleteChat, renameChat, setChatModel, setChatSettings } from "@/lib/data/chats";
 
 const id = z.uuid();
 
@@ -32,4 +33,15 @@ export async function changeModel(chatId: string, model: string): Promise<void> 
   if (!parsed.success) return;
   await setChatModel(parsed.data.chatId, parsed.data.model);
   revalidatePath("/asistente");
+}
+
+const settingsSchema = z.object({
+  reasoning_effort: z.custom<ReasoningEffort>(isReasoningEffort).optional(),
+  max_output_tokens: z.literal(TOKEN_LIMITS).optional(),
+});
+
+export async function changeSettings(chatId: string, settings: z.input<typeof settingsSchema>): Promise<void> {
+  const parsed = settingsSchema.safeParse(settings);
+  if (!id.safeParse(chatId).success || !parsed.success) return;
+  await setChatSettings(chatId, parsed.data);
 }
