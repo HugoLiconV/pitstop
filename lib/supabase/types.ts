@@ -43,6 +43,40 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"chat_messages": {
+                  Row: {
+                    "chat_id": string,"created_at": string,"id": string,"metadata": Json | null,"parts": NonNullable<Json>,"role": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chat_id": string,"created_at"?: string,"id": string,"metadata"?: Json | null,"parts": NonNullable<Json>,"role": string,"user_id"?: string
+                  }
+                  Update: {
+                    "chat_id"?: string,"created_at"?: string,"id"?: string,"metadata"?: Json | null,"parts"?: NonNullable<Json>,"role"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_messages_chat_id_fkey"
+      columns: ["chat_id"]
+isOneToOne: false
+      referencedRelation: "chats"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chats": {
+                  Row: {
+                    "created_at": string,"id": string,"max_output_tokens": number,"model": string,"reasoning_effort": string,"title": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"max_output_tokens"?: number,"model"?: string,"reasoning_effort"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"max_output_tokens"?: number,"model"?: string,"reasoning_effort"?: string,"title"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"maintenance_items": {
                   Row: {
                     "active": boolean,"created_at": string,"id": string,"interval_km": number | null,"interval_months": number | null,"manual_page": string | null,"name": string,"notes": string | null,"source": string,"user_id": string,"vehicle_id": string
